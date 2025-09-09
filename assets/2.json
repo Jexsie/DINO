@@ -1,0 +1,38 @@
+{
+  "name": "YOUR_NAME_PREFIX_HERE #2",
+  "description": "YOUR_DESCRIPTION_HERE",
+  "file_url": "ipfs://ADD_IPFS_IMAGE_CID_HERE/2.png",
+  "image": "ipfs://ADD_IPFS_IMAGE_CID_HERE/2.png",
+  "attributes": [
+    {
+      "trait_type": "background",
+      "value": "purple"
+    },
+    {
+      "trait_type": "animal",
+      "value": "cat"
+    },
+    {
+      "trait_type": "mouth",
+      "value": "bubble gum"
+    },
+    {
+      "trait_type": "head",
+      "value": "skull"
+    },
+    {
+      "trait_type": "clothing",
+      "value": "blue tee"
+    },
+    {
+      "trait_type": "eyewear",
+      "value": "shades"
+    }
+  ],
+  "custom_fields": {
+    "dna": "09a8beef809713f07c574d32e91dd32f0b4e53f0",
+    "edition": 2,
+    "date": 1754301472863,
+    "compiler": "HashLips Art Engine - Modified By ThePeanutGalleryAndCo"
+  }
+}

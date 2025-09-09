@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <link crossorigin="" href="https://fonts.gstatic.com/" rel="preconnect" />
+    <link
+      as="style"
+      href="https://fonts.googleapis.com/css2?display=swap&amp;family=Press+Start+2P&amp;family=VT323"
+      onload="this.rel='stylesheet'"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined"
+      rel="stylesheet"
+    />
+    <title>Dino - A Blockchain Game</title>
+    <link href="data:image/x-icon;base64," rel="icon" type="image/x-icon" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <style type="text/tailwindcss">
+      :root {
+        --pixel-border: 4px;
+        --pixel-border-color: #000;
+        --pixel-border-2: 8px;
+        --pixel-shadow: 4px 4px 0px #000;
+        --pixel-shadow-hover: 6px 6px 0px #000;
+      }
+      body {
+        font-family: "VT323", monospace;
+      }
+      .pixel-font {
+        font-family: "Press Start 2P", cursive;
+      }
+      .pixel-border {
+        border: var(--pixel-border) solid var(--pixel-border-color);
+        box-shadow: var(--pixel-shadow);
+        image-rendering: pixelated;
+      }
+      .pixel-border-2 {
+        border: var(--pixel-border-2) solid;
+        border-image-slice: 2;
+        border-image-width: 8px;
+        border-image-repeat: stretch;
+        border-image-source: url('data:image/svg+xml;utf8,<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M0 0 H8 V8 H0Z M8 8 H16 V16 H8Z M16 16 H24 V24 H16Z" fill="rgb(255,165,0)"/><path d="M8 0 H16 V8 H8Z M16 8 H24 V16 H16Z M0 8 H8 V16 H0Z M8 16 H16 V24 H8Z" fill="rgb(128,0,128)"/></svg>');
+        image-rendering: pixelated;
+      }
+      .pixel-button {
+        border: var(--pixel-border) solid var(--pixel-border-color);
+        box-shadow: var(--pixel-shadow);
+        transition: all 0.1s ease-in-out;
+      }
+      .pixel-button:hover {
+        transform: translate(-2px, -2px);
+        box-shadow: var(--pixel-shadow-hover);
+      }
+      .pixel-button:active {
+        transform: translate(2px, 2px);
+        box-shadow: 2px 2px 0px #000;
+      }
+      .text-shadow {
+        text-shadow: 2px 2px 0 #000;
+      }
+      .parallax-bg {
+        background-color: #0b0a1e;
+        position: relative;
+        overflow: hidden;
+      }
+      .parallax-layer {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-repeat: repeat;
+        image-rendering: pixelated;
+        animation: scroll-bg linear infinite;
+      }
+      #stars-1 {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3e%3ccircle cx='10' cy='10' r='1' fill='white'/%3e%3ccircle cx='90' cy='90' r='1' fill='white'/%3e%3ccircle cx='150' cy='170' r='1' fill='white'/%3e%3c/svg%3e");
+        animation-duration: 60s;
+      }
+      #stars-2 {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3e%3ccircle cx='20' cy='80' r='1' fill='white'/%3e%3ccircle cx='80' cy='20' r='1' fill='white'/%3e%3ccircle cx='180' cy='120' r='1' fill='white'/%3e%3c/svg%3e");
+        animation-duration: 40s;
+        animation-direction: reverse;
+      }
+      #planets-1 {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 300'%3e%3ccircle cx='50' cy='50' r='4' fill='%23fde047'/%3e%3ccircle cx='250' cy='150' r='8' fill='%23a78bfa'/%3e%3c/svg%3e");
+        animation-duration: 20s;
+      }
+      #planets-2 {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400'%3e%3cpath d='M40 10 C 50 20, 60 5, 70 15' stroke='%23f472b6' stroke-width='2' fill='none'/%3e%3ccircle cx='150' cy='250' r='12' fill='%23fb923c'/%3e%3c/svg%3e");
+        animation-duration: 15s;
+        animation-direction: reverse;
+      }
+      @keyframes scroll-bg {
+        from {
+          transform: translateY(0);
+        }
+        to {
+          transform: translateY(-100%);
+        }
+      }
+    </style>
+  </head>
+  <body
+    class="bg-cover bg-center bg-no-repeat"
+    style="background-color: #1a1a2e"
+  >
+    <div
+      class="relative flex size-full min-h-screen flex-col items-center justify-center p-4 sm:p-6 md:p-8"
+    >
+      <header class="w-full text-center mb-8 py-12 parallax-bg pixel-border">
+        <div class="parallax-layer" id="stars-1"></div>
+        <div class="parallax-layer" id="stars-2"></div>
+        <div class="parallax-layer" id="planets-1"></div>
+        <div class="parallax-layer" id="planets-2"></div>
+        <div class="relative z-10">
+          <h1
+            class="pixel-font text-6xl sm:text-7xl md:text-8xl font-bold text-shadow text-yellow-400"
+            style="text-shadow: 4px 4px 0 #8b5cf6, 8px 8px 0 #ec4899"
+          >
+            Dino
+          </h1>
+        </div>
+      </header>
+      <main class="w-full max-w-7xl flex flex-col items-center">
+        <!-- overlay for confetti -->
+        <canvas
+          id="fx"
+          style="position: absolute; inset: 0; pointer-events: none"
+        ></canvas>
+        <div class="flex flex-col sm:flex-row gap-6 w-full max-w-2xl mb-8">
+          <button
+            class="pixel-font text-xl flex-1 flex items-center justify-center gap-3 py-4 px-6 bg-green-500 text-white pixel-button"
+          >
+            <span class="material-symbols-outlined"
+              >account_balance_wallet</span
+            >
+            <span class="truncate">Connect Wallet</span>
+          </button>
+          <button
+            class="pixel-font text-xl flex-1 py-4 px-6 bg-purple-600 text-white pixel-button"
+          >
+            <span class="truncate">Play Now</span>
+          </button>
+        </div>
+        <div class="flex items-center justify-center w-full gap-4 mb-8">
+          <div class="hidden lg:flex flex-col items-center gap-4">
+            <div
+              class="p-2 pixel-border bg-gray-800/50 cursor-pointer hover:bg-yellow-400/20 transition-colors"
+            >
+              <img
+                alt="Desert Theme"
+                class="w-32 h-32 object-cover pixel-border"
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuBTZrukPwpI0fprjUIVLBUJnra60v5IN1mRQ4puAM2v9-YqZroeVSgVx3eLHLhGLLZWoHnyE1eRp5R0jXeiHpHPMaIizZNypa-PJVtOP-kBsaVUew7FrC5_RdSYv87Deiuv2gbrRIBcDCt3dpJKG0pWW2I-1t4mnutnGrW4B1Fol0N5Uwzwjrbk8a7gki9KzOwoP0Tb5yLBNgYorMsJpQX5aAi900QtUhde0F-4w-uSJnaQdCXSsHpJO8FKGXiVvtZOAMc9dX1cClQ"
+              />
+              <p class="pixel-font text-center mt-2 text-white">Desert</p>
+            </div>
+            <div
+              class="p-2 pixel-border bg-gray-800/50 cursor-pointer hover:bg-yellow-400/20 transition-colors"
+            >
+              <img
+                alt="Jungle Theme"
+                class="w-32 h-32 object-cover pixel-border"
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuBAOBPgRvrg2yMzCmbo5ur7BEEe902BNMTkPSTEbx4xnE9GIHkcCbPxlJeKeabRhcMIlna7oScxDV5xx6UMPd1ZIilUfEG8Gj4kOol0C500PKgdnZDd-F_Hn19Z3E1xWmFD_spzzna5KYdMYtF-_lX_NoIOdxUFdzoT9YEpc4khMd7BEVxuVK37_gcrM7dHXEwPZQldY4s9-HbV-GBaImsl8qAR_YZGFHo3CW4ql6A4Qpy3hteAC4-BmaTyAQL-oURHP4P1NHX584k"
+              />
+              <p class="pixel-font text-center mt-2 text-white">Jungle</p>
+            </div>
+          </div>
+          <div class="w-full max-w-3xl p-2 bg-gray-700 pixel-border-2">
+            <div class="w-full">
+              <div id="container">
+                <canvas id="board"></canvas>
+              </div>
+            </div>
+          </div>
+          <div class="hidden lg:flex flex-col items-center gap-4">
+            <div
+              class="p-2 pixel-border bg-gray-800/50 cursor-pointer hover:bg-yellow-400/20 transition-colors"
+            >
+              <img
+                alt="Ice Theme"
+                class="w-32 h-32 object-cover pixel-border"
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuBwmvpgqCCzqisI-KuUpEOA7X4sWhuufmYkfNNuv6QRhaZE66GoVictLvkajtBc_rMxcpqkPPcfcfO-g3ZGHMtzUIERIQllknEHfLCTnO13mogidvBAU4tewpozZYH81wh9MX_ztZeMVtuQu3xEHFClyX_RdpMwjNq8w3KSVzaztHBxMeFjcbzQ1XSvth6BgoWf2GBrH99ynAZXlAZBXBv0qFZMNwTYMBelq0B40xoB_c263KONcoj953DexRPV7x5u-zIae67bthw"
+              />
+              <p class="pixel-font text-center mt-2 text-white">Ice</p>
+            </div>
+            <div
+              class="p-2 pixel-border bg-gray-800/50 cursor-pointer hover:bg-yellow-400/20 transition-colors"
+            >
+              <img
+                alt="Volcano Theme"
+                class="w-32 h-32 object-cover pixel-border"
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuAnyKVMZvYVTUHzJKXvHIuCbLHXwDIbTKRwje94NqrjTe0dO9NY67cRRMMv51XLh-X279Oz64Is_HwC8EFS6QISGO-mqyI0UPqch9S45pR4m4un-pTJCargjnlhp70Fnn1N7JWYuxEkoBK-dywsfAQmyyUNQ2RK9cPmwix2-owZeF3bU7HIDzP-EhExp5RY9SrZfft1CX00sx-63n4dJgl72PL56KcRXgkcjBJlbDkScm8aYHq3phzW8xZgYVE4GlhDEEk0G-rNozA"
+              />
+              <p class="pixel-font text-center mt-2 text-white">Volcano</p>
+            </div>
+          </div>
+        </div>
+        <div
+          class="w-full max-w-2xl bg-cover bg-center p-6 pixel-border mb-8"
+          style="
+            background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAQKADAAQAAAABAAAAQAAAAABGUUKwAAABvElEQVRoBe2ZPUtbURiFv/sH09hA0sJaWFrbWFvbKkRTpEtbW3+B/4FCcDEV0qVLF2sV3bWLuhRRRGkXhUKKBEHUKHSi7vTmvXcvkXBCkCAn9+FwnPM99wn33PcJgB92w8PXqW9eBwAYAGADgA0ANgDYAGAeAMAPwBMAA0ADgBGAQwDmAdwDqAbwDsA+wL8DeAegDWA9wJMAfwCgAfAmgGcAeARgHuBXgLcAeAegHWBdwLcAvgBwAKAZgG8APA3gFoA7APcAvgMwDPAagH2APwHsB7gM4BWAbwA8DODfAXgTQDPAKwCeATHAwgSAAwACgA0ANgDYAGADgA0ANgDYAGAeAMAvwDcAjgC8ALAPcBegWsC3AN4C8AzAUwDPAK8A+BVgG8A7AHcA3gIYBvAWwL8G8BfAOYBvAPwM4A2AWwC/A3gO4FvA3wDWAQwDyAOYAPAMwDMANgDYAGADgA0ANgDYAGAeAMC/C3gF4C2A3wA8AfA3gHcA7gLcBfAGwG8A3gJ4BmAewIcAPgMwD+ANgG8BvAjgG4BvAdwBWAwwDOIcwJeAIQAnADQAUAIwAOARgAkAnwCEAXgGYBegW4A/AbwL8AngG4AlAG0AXQCEAVgHUA3gG4A/AbwCcANgDYC9AOcACAP4B8B/APwE4F8AgAEAgAEAAAAHAK8/cQYAnG8+AwD0A/gL4MMABgAEAAIAAQCAABgA8AvwSwCWAJwA8A/ALwBeAbgEcAZgB8A+gGsApwBmAXwCcAxgGcA/AOcA/gJ4C+APgF8ADgAcAkgCWAqwCmA3wEWAgwCHAMcASwD2ATwD8BPAHoBPAGcApgCcA7gE8A3AUYDLAJcAjgAsAlQClAKsBjgKcAzgGcA/AO8AfgG8A/gdgHMApQA2A2wG2AngIuAiwCGA3QDbAbYDnAMcAdgKcBngOsCxAGsBpgLcBbgOcA1gN8A1gIsAjgBMAhgDMAIwAWAIwAjAIgCLACwCGAJgCEASgCEAWQBWALIAzAIYAzAGYBfALoBdAMcAjgGcALgEcAXgFMApAFMApgAMAZgA8AvAKoBVAE8B+AVgCcAigPsBNgNsBtgM8BfAF4BfAP4CoA/QDWAbwC6ADYDnAWwE2A3gE2A3wG2AXQD7AVYDbATYDdANoBvAMMA/gH8A/gH4D+AfwD+AvgH4B+A/gP4B+A/gHMAAAAAAElFTkSuQmCC');
+            background-color: #60a5fa;
+          "
+        >
+          <h2
+            class="pixel-font text-3xl font-bold mb-4 text-center text-white text-shadow"
+          >
+            About the Game
+          </h2>
+          <p class="text-xl leading-relaxed text-center text-white text-shadow">
+            Embark on an epic journey through the pixelated world of Dino, a
+            blockchain-powered adventure where you can collect, battle, and
+            trade unique digital creatures. Explore diverse landscapes, uncover
+            hidden treasures, and challenge other players in thrilling arena
+            battles. With its retro charm and innovative gameplay, Dino offers a
+            nostalgic yet cutting-edge gaming experience.
+          </p>
+        </div>
+      </main>
+      <footer
+        class="fixed bottom-0 left-0 right-0 p-4 bg-[#131118]/80 backdrop-blur-sm z-50"
+      >
+        <nav class="flex justify-center gap-4">
+          <a
+            class="pixel-button pixel-font text-lg text-white bg-blue-600 py-2 px-4 flex items-center gap-2"
+            href="#"
+          >
+            <span class="material-symbols-outlined">home</span>
+            Home
+          </a>
+          <a
+            class="pixel-button pixel-font text-lg text-white bg-yellow-500 py-2 px-4 flex items-center gap-2"
+            href="#"
+          >
+            <span class="material-symbols-outlined">leaderboard</span>
+            Leaderboard
+          </a>
+          <a
+            class="pixel-button pixel-font text-lg text-white bg-red-600 py-2 px-4 flex items-center gap-2"
+            href="#"
+          >
+            <span class="material-symbols-outlined">storefront</span>
+            Store
+          </a>
+        </nav>
+      </footer>
+    </div>
+    <script src="./output.js"></script>
+  </body>
+</html>
