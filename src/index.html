@@ -125,11 +125,6 @@
         </div>
       </header>
       <main class="w-full max-w-7xl flex flex-col items-center">
-        <!-- overlay for confetti -->
-        <canvas
-          id="fx"
-          style="position: absolute; inset: 0; pointer-events: none"
-        ></canvas>
         <div class="flex flex-col sm:flex-row gap-6 w-full max-w-2xl mb-8">
           <button
             class="pixel-font text-xl flex-1 flex items-center justify-center gap-3 py-4 px-6 bg-green-500 text-white pixel-button"
@@ -171,6 +166,12 @@
           <div class="w-full max-w-3xl p-2 bg-gray-700 pixel-border-2">
             <div class="w-full">
               <div id="container">
+                <!-- overlay for confetti -->
+                <canvas
+                  id="fx"
+                  style="position: absolute; inset: 0; pointer-events: none"
+                ></canvas>
+                <!-- game canvas -->
                 <canvas id="board"></canvas>
               </div>
             </div>
