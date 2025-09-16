@@ -1,0 +1,205 @@
+{
+	"compiler": {
+		"version": "0.8.30+commit.73712a01"
+	},
+	"language": "Solidity",
+	"output": {
+		"abi": [
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "_tokenAddress",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "_treasury",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "_minter",
+						"type": "address"
+					}
+				],
+				"stateMutability": "nonpayable",
+				"type": "constructor"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "newMinter",
+						"type": "address"
+					}
+				],
+				"name": "MinterUpdated",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "to",
+						"type": "address"
+					},
+					{
+						"indexed": false,
+						"internalType": "int64",
+						"name": "serial",
+						"type": "int64"
+					},
+					{
+						"indexed": false,
+						"internalType": "string",
+						"name": "metadataURI",
+						"type": "string"
+					}
+				],
+				"name": "NftMinted",
+				"type": "event"
+			},
+			{
+				"inputs": [],
+				"name": "hts",
+				"outputs": [
+					{
+						"internalType": "contract IHederaTokenService",
+						"name": "",
+						"type": "address"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "recipient",
+						"type": "address"
+					},
+					{
+						"internalType": "string",
+						"name": "metadataURI",
+						"type": "string"
+					}
+				],
+				"name": "mintAndSend",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "minter",
+				"outputs": [
+					{
+						"internalType": "address",
+						"name": "",
+						"type": "address"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "owner",
+				"outputs": [
+					{
+						"internalType": "address",
+						"name": "",
+						"type": "address"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "tokenAddress",
+				"outputs": [
+					{
+						"internalType": "address",
+						"name": "",
+						"type": "address"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "treasury",
+				"outputs": [
+					{
+						"internalType": "address",
+						"name": "",
+						"type": "address"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "newMinter",
+						"type": "address"
+					}
+				],
+				"name": "updateMinter",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			}
+		],
+		"devdoc": {
+			"kind": "dev",
+			"methods": {},
+			"version": 1
+		},
+		"userdoc": {
+			"kind": "user",
+			"methods": {
+				"mintAndSend(address,string)": {
+					"notice": "Mints one NFT with `metadataURI` to treasury, ensures `recipient` is associated, then transfers the newly minted serial to `recipient`. NOTE: If association from a contract to a user account is not permitted in your wallet/flow, remove the associate call and have the user associate first."
+				}
+			},
+			"version": 1
+		}
+	},
+	"settings": {
+		"compilationTarget": {
+			"contracts/dino-nft-mint.sol": "DinoNftMinter"
+		},
+		"evmVersion": "prague",
+		"libraries": {},
+		"metadata": {
+			"bytecodeHash": "ipfs"
+		},
+		"optimizer": {
+			"enabled": false,
+			"runs": 200
+		},
+		"remappings": []
+	},
+	"sources": {
+		"contracts/dino-nft-mint.sol": {
+			"keccak256": "0x5e2c12ab92bbf287f33876f6b4070a41e04591179830b5fb209f7b94a0e6f2da",
+			"license": "Apache-2.0",
+			"urls": [
+				"bzz-raw://a8919d094e1157fe54ce09aa648313692544412dc9446c960242da969bc5eadd",
+				"dweb:/ipfs/QmXKHSiEkfiEGeMGJrj2ioWJ1X38MwNWR7M6rqnayFywmv"
+			]
+		}
+	},
+	"version": 1
+}

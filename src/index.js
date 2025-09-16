@@ -28,6 +28,12 @@ import {
   startTrack,
   stopTrack,
 } from "./audio";
+import {
+  initWallet,
+  connectWallet,
+  disconnectWallet,
+  onWalletEvents,
+} from "./wallet";
 
 // === CANVASES ===
 const canvas = document.getElementById("board");
@@ -37,7 +43,6 @@ const canvas_ctx = canvas.getContext("2d");
 const fx = document.getElementById("fx");
 const fxCtx = fx.getContext("2d");
 
-// === GAME CONSTANTS ===
 const CELL_SIZE = 2;
 const ROWS = 300;
 let COLUMNS = 1000;
@@ -310,7 +315,17 @@ let harmfull_character_allocator = [
 
 // === INIT ===
 function initialize() {
-  current_theme = themes.colorful;
+  // Try to load saved theme, otherwise default
+  const saved = localStorage.getItem("dino_theme");
+  if (saved) {
+    try {
+      current_theme = JSON.parse(saved);
+    } catch {
+      current_theme = themes.colorful;
+    }
+  } else {
+    current_theme = themes.colorful;
+  }
   cumulative_velocity = new Velocity(0, 0);
   game_over = false;
   game_score = 0;
@@ -345,19 +360,24 @@ function initialize() {
   ];
 
   function handleStartOrJump() {
+    // restart after game over
     if (game_over && Date.now() - game_over > 1000) {
-      main();
+      main(); // main() will reset game_over now
+      startTrack(); // start background music immediately
       return;
     }
+
+    // first-time start (is_first_time is handled in event_loop, but we can still start music here)
+    if (is_first_time) {
+      startTrack(); // 🎵 start track as soon as user presses space to start
+    }
+
+    // jump logic
     if (dino_ready_to_jump) {
       dino_ready_to_jump = false;
       dino_current_trust = DINO_INITIAL_TRUST.clone();
 
-      // start gameplay music on first actual jump
-      startTrack();
-
-      // play jump sfx
-      playJump();
+      playJump(); // 🦖 jump sound only when we actually jump
     }
   }
 
@@ -408,14 +428,14 @@ function event_loop() {
     game_score++;
   }
 
-  if (game_score !== 0 && game_score % 300 === 0) {
-    game_score++;
-    if (current_theme.id == 1) {
-      current_theme = themes.dark;
-    } else {
-      current_theme = themes.classic;
-    }
-  }
+  // if (game_score !== 0 && game_score % 300 === 0) {
+  //   game_score++;
+  //   if (current_theme.id == 1) {
+  //     current_theme = themes.dark;
+  //   } else {
+  //     current_theme = themes.classic;
+  //   }
+  // }
 
   canvas_ctx.clearRect(0, 0, canvas.width, canvas.height);
   canvas_ctx.fillStyle = current_theme.background;
@@ -427,21 +447,40 @@ function event_loop() {
   canvas_ctx.fillRect(0, 232, canvas.width, CELL_SIZE * 0.2);
 
   // score card update
+  // canvas_ctx.font = "10px 'Press Start 2P'";
+  // canvas_ctx.fillStyle = current_theme.score_text;
+  // canvas_ctx.fillText(
+  //   `H I     ${Math.floor(game_hi_score)
+  //     .toString()
+  //     .padStart(4, "0")
+  //     .split("")
+  //     .join(" ")}     ${game_score
+  //     .toString()
+  //     .padStart(4, "0")
+  //     .split("")
+  //     .join(" ")}`,
+  //   canvas.width - 200,
+  //   20
+  // );
+  const scoreText = `H I     ${Math.floor(game_hi_score)
+    .toString()
+    .padStart(4, "0")
+    .split("")
+    .join(" ")}     ${game_score
+    .toString()
+    .padStart(4, "0")
+    .split("")
+    .join(" ")}`;
+
   canvas_ctx.font = "20px 'Press Start 2P'";
   canvas_ctx.fillStyle = current_theme.score_text;
-  canvas_ctx.fillText(
-    `H I     ${Math.floor(game_hi_score)
-      .toString()
-      .padStart(4, "0")
-      .split("")
-      .join(" ")}     ${game_score
-      .toString()
-      .padStart(4, "0")
-      .split("")
-      .join(" ")}`,
-    canvas.width - 200,
-    20
-  );
+
+  // measure how wide the text is
+  const textWidth = canvas_ctx.measureText(scoreText).width;
+
+  // draw so it fits inside the right edge with some margin
+  const margin = 20;
+  canvas_ctx.fillText(scoreText, canvas.width - textWidth - margin, 30);
 
   // first time screen
   if (is_first_time) {
@@ -635,6 +674,13 @@ function event_loop() {
 
 // === BOOT ===
 function main() {
+  game_over = null; // ✅ clear old state
+  pendingCelebrate = false;
+  if (celebrateFallbackTimer) {
+    clearTimeout(celebrateFallbackTimer);
+    celebrateFallbackTimer = null;
+  }
+
   initialize();
   event_loop();
 }
@@ -653,6 +699,8 @@ function resizeCanvas() {
   // Match FX overlay to game canvas
   fx.width = canvas.width;
   fx.height = canvas.height;
+
+  repaintOnce();
 }
 
 window.addEventListener("resize", resizeCanvas);
@@ -703,6 +751,8 @@ async function useNFT() {
     };
 
     console.log("NFT theme applied:", current_theme);
+    localStorage.setItem("dino_theme", JSON.stringify(current_theme));
+    repaintOnce();
   } catch (err) {
     console.error("Failed to load NFT:", err);
   }
@@ -789,4 +839,149 @@ function celebrateCenter() {
     speed: 6,
     spread: Math.PI * 1.5,
   });
+}
+
+// Footer UI sync
+function updateWalletUI(accountId) {
+  const wrap = document.getElementById("walletStatus");
+  const idSpan = document.getElementById("walletId");
+  const connectBtn = document.getElementById("connectWalletBtn");
+
+  if (!wrap || !idSpan) return;
+
+  if (accountId) {
+    wrap.classList.remove("hidden");
+    // You can shorten the display if you like:
+    idSpan.textContent = accountId; // or accountId.replace(/^hedera:[^:]+:/, "")
+    if (connectBtn) connectBtn.classList.add("hidden");
+  } else {
+    wrap.classList.add("hidden");
+    idSpan.textContent = "";
+    if (connectBtn) connectBtn.classList.remove("hidden");
+  }
+}
+
+console.log("index.js loaded");
+
+(async function initUI() {
+  console.log("initUI running…");
+
+  // Restore any existing session on load
+  const existing = await initWallet();
+  updateWalletUI(existing);
+
+  // Keep in sync with WC events
+  onWalletEvents({ onChange: updateWalletUI });
+
+  // Connect button
+  const connectBtn = document.getElementById("connectWalletBtn");
+  if (connectBtn) {
+    connectBtn.addEventListener("click", async () => {
+      const acct = await connectWallet();
+      updateWalletUI(acct);
+    });
+  }
+
+  // Disconnect button (in footer)
+  const disBtn = document.getElementById("walletDisconnect");
+  if (disBtn) {
+    disBtn.addEventListener("click", async () => {
+      await disconnectWallet();
+      updateWalletUI(null);
+    });
+  }
+})();
+
+function repaintOnce() {
+  if (!canvas || !canvas_ctx || !current_theme) return;
+
+  // background
+  canvas_ctx.clearRect(0, 0, canvas.width, canvas.height);
+  canvas_ctx.fillStyle = current_theme.background;
+  canvas_ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // road
+  canvas_ctx.fillStyle = current_theme.road;
+  canvas_ctx.fillRect(0, 232, canvas.width, CELL_SIZE * 0.2);
+
+  // scoreline (same style you use in the loop)
+  const scoreText = `H I     ${Math.floor(game_hi_score)
+    .toString()
+    .padStart(4, "0")
+    .split("")
+    .join(" ")}     ${game_score
+    .toString()
+    .padStart(4, "0")
+    .split("")
+    .join(" ")}`;
+  canvas_ctx.font = "20px 'Press Start 2P'";
+  canvas_ctx.fillStyle = current_theme.score_text;
+  const textWidth = canvas_ctx.measureText(scoreText).width;
+  const margin = 20;
+  canvas_ctx.fillText(scoreText, canvas.width - textWidth - margin, 30);
+
+  // draw characters at their current positions (NO tick, NO velocity changes)
+  [harmless_characters_pool, harmfull_characters_pool].forEach(
+    (pool, index) => {
+      if (!pool) return;
+      for (let i = 0; i < pool.length; i++) {
+        let layout = pool[i].get_layout();
+        // keep dino in "stand" while jumping, like your loop does
+        if (!dino_ready_to_jump && index === 1 && i === 0) {
+          layout = dino_layout.stand;
+        }
+        const pos = pool[i].get_position().get();
+        paint_layout(layout, pos);
+      }
+    }
+  );
+
+  // first-time overlay
+  if (is_first_time) {
+    // ensure a standing dino is visible even if pool didn't draw yet
+    if (harmfull_characters_pool?.[0]) {
+      paint_layout(
+        dino_layout.stand,
+        harmfull_characters_pool[0].get_position().get()
+      );
+    }
+    canvas_ctx.textBaseline = "middle";
+    canvas_ctx.textAlign = "center";
+    canvas_ctx.font = "25px 'Press Start 2P'";
+    canvas_ctx.fillStyle = current_theme.info_text;
+    canvas_ctx.fillText(
+      "J U M P   T O   S T A R T",
+      canvas.width / 2,
+      canvas.height / 2 - 50
+    );
+    return;
+  }
+
+  // game-over overlay (if currently in game-over state)
+  if (game_over) {
+    canvas_ctx.textBaseline = "middle";
+    canvas_ctx.textAlign = "center";
+    canvas_ctx.font = "20px 'Press Start 2P'";
+    canvas_ctx.fillStyle = current_theme.info_text;
+    canvas_ctx.fillText(
+      "G A M E  O V E R",
+      canvas.width / 2,
+      canvas.height / 2 - 50
+    );
+
+    // retry icon and dead dino (same visuals you show on collision)
+    paint_layout(
+      retry_layout,
+      new Position(
+        canvas.height / 2 - retry_layout.length,
+        canvas.width / 2 - retry_layout[0].length
+      ).get()
+    );
+    if (harmfull_characters_pool?.[0]) {
+      paint_layout(
+        dino_layout.dead,
+        harmfull_characters_pool[0].get_position().get()
+      );
+    }
+  }
 }

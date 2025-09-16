@@ -127,6 +127,7 @@
       <main class="w-full max-w-7xl flex flex-col items-center">
         <div class="flex flex-col sm:flex-row gap-6 w-full max-w-2xl mb-8">
           <button
+            id="connectWalletBtn"
             class="pixel-font text-xl flex-1 flex items-center justify-center gap-3 py-4 px-6 bg-green-500 text-white pixel-button"
           >
             <span class="material-symbols-outlined"
@@ -152,16 +153,18 @@
               />
               <p class="pixel-font text-center mt-2 text-white">Desert</p>
             </div>
-            <div
-              class="p-2 pixel-border bg-gray-800/50 cursor-pointer hover:bg-yellow-400/20 transition-colors"
-            >
-              <img
-                alt="Jungle Theme"
-                class="w-32 h-32 object-cover pixel-border"
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuBAOBPgRvrg2yMzCmbo5ur7BEEe902BNMTkPSTEbx4xnE9GIHkcCbPxlJeKeabRhcMIlna7oScxDV5xx6UMPd1ZIilUfEG8Gj4kOol0C500PKgdnZDd-F_Hn19Z3E1xWmFD_spzzna5KYdMYtF-_lX_NoIOdxUFdzoT9YEpc4khMd7BEVxuVK37_gcrM7dHXEwPZQldY4s9-HbV-GBaImsl8qAR_YZGFHo3CW4ql6A4Qpy3hteAC4-BmaTyAQL-oURHP4P1NHX584k"
-              />
-              <p class="pixel-font text-center mt-2 text-white">Jungle</p>
-            </div>
+            <button onclick="useNFT()">
+              <div
+                class="p-2 pixel-border bg-gray-800/50 cursor-pointer hover:bg-yellow-400/20 transition-colors"
+              >
+                <img
+                  alt="Jungle Theme"
+                  class="w-32 h-32 object-cover pixel-border"
+                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuBAOBPgRvrg2yMzCmbo5ur7BEEe902BNMTkPSTEbx4xnE9GIHkcCbPxlJeKeabRhcMIlna7oScxDV5xx6UMPd1ZIilUfEG8Gj4kOol0C500PKgdnZDd-F_Hn19Z3E1xWmFD_spzzna5KYdMYtF-_lX_NoIOdxUFdzoT9YEpc4khMd7BEVxuVK37_gcrM7dHXEwPZQldY4s9-HbV-GBaImsl8qAR_YZGFHo3CW4ql6A4Qpy3hteAC4-BmaTyAQL-oURHP4P1NHX584k"
+                />
+                <p class="pixel-font text-center mt-2 text-white">Jungle</p>
+              </div>
+            </button>
           </div>
           <div class="w-full max-w-3xl p-2 bg-gray-700 pixel-border-2">
             <div class="w-full">
@@ -246,9 +249,27 @@
             <span class="material-symbols-outlined">storefront</span>
             Store
           </a>
+
+          <!-- Wallet status (hidden until connected) -->
+          <div
+            id="walletStatus"
+            class="hidden pixel-button pixel-font text-lg text-white bg-green-600 py-2 px-4 flex items-center gap-2"
+          >
+            <span class="material-symbols-outlined"
+              >account_balance_wallet</span
+            >
+            <span id="walletId">—</span>
+            <button
+              id="walletDisconnect"
+              type="button"
+              class="ml-2 bg-black/30 px-2 py-1 rounded"
+            >
+              Disconnect
+            </button>
+          </div>
         </nav>
       </footer>
     </div>
-    <script src="./output.js"></script>
+    <script src="./output.js" defer></script>
   </body>
 </html>

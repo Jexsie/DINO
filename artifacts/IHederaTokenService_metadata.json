@@ -1,0 +1,143 @@
+{
+	"compiler": {
+		"version": "0.8.30+commit.73712a01"
+	},
+	"language": "Solidity",
+	"output": {
+		"abi": [
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "account",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "token",
+						"type": "address"
+					}
+				],
+				"name": "associateToken",
+				"outputs": [
+					{
+						"internalType": "int64",
+						"name": "responseCode",
+						"type": "int64"
+					}
+				],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "token",
+						"type": "address"
+					},
+					{
+						"internalType": "uint64",
+						"name": "amount",
+						"type": "uint64"
+					},
+					{
+						"internalType": "bytes[]",
+						"name": "metadata",
+						"type": "bytes[]"
+					}
+				],
+				"name": "mintToken",
+				"outputs": [
+					{
+						"internalType": "int64",
+						"name": "responseCode",
+						"type": "int64"
+					},
+					{
+						"internalType": "int64",
+						"name": "newTotalSupply",
+						"type": "int64"
+					},
+					{
+						"internalType": "int64[]",
+						"name": "serialNumbers",
+						"type": "int64[]"
+					}
+				],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "token",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "sender",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "recipient",
+						"type": "address"
+					},
+					{
+						"internalType": "int64",
+						"name": "serial",
+						"type": "int64"
+					}
+				],
+				"name": "transferToken",
+				"outputs": [
+					{
+						"internalType": "int64",
+						"name": "responseCode",
+						"type": "int64"
+					}
+				],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			}
+		],
+		"devdoc": {
+			"kind": "dev",
+			"methods": {},
+			"version": 1
+		},
+		"userdoc": {
+			"kind": "user",
+			"methods": {},
+			"version": 1
+		}
+	},
+	"settings": {
+		"compilationTarget": {
+			"contracts/dino-nft-mint.sol": "IHederaTokenService"
+		},
+		"evmVersion": "prague",
+		"libraries": {},
+		"metadata": {
+			"bytecodeHash": "ipfs"
+		},
+		"optimizer": {
+			"enabled": false,
+			"runs": 200
+		},
+		"remappings": []
+	},
+	"sources": {
+		"contracts/dino-nft-mint.sol": {
+			"keccak256": "0x5e2c12ab92bbf287f33876f6b4070a41e04591179830b5fb209f7b94a0e6f2da",
+			"license": "Apache-2.0",
+			"urls": [
+				"bzz-raw://a8919d094e1157fe54ce09aa648313692544412dc9446c960242da969bc5eadd",
+				"dweb:/ipfs/QmXKHSiEkfiEGeMGJrj2ioWJ1X38MwNWR7M6rqnayFywmv"
+			]
+		}
+	},
+	"version": 1
+}
