@@ -1,6 +1,3 @@
-// === AUDIO ===
-// Put these files where your server can serve them. If you're serving /assets as the static root,
-// use "jump.mp3" directly; otherwise "assets/jump.mp3" etc.
 const sJump = new Audio("jump.wav");
 const sGameOver = new Audio("game-over.wav");
 const sGameOverVoice = new Audio("game-over-voice.mp3");

@@ -1,4 +1,3 @@
-
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity >=0.5.0 <0.9.0;
 
@@ -68,31 +67,6 @@ contract NFTCreator is ExpiryHelper, KeyHelper, HederaTokenService {
         }
 
         return response;
-    }
-
-    function mintAndTransfer(
-        address token,
-        address receiver,
-        bytes[] memory metadata
-    ) external returns(int64){
-
-        // 1. Mint the NFT to this contract
-        (int response, , int64[] memory serial) = HederaTokenService.mintToken(token, 0, metadata);
-
-        if(response != HederaResponseCodes.SUCCESS){
-            revert("Failed to mint non-fungible token");
-        }
-
-        int64 serialNumber = serial[0];
-
-        // 2. Transfer the NFT to the receiver
-        response = HederaTokenService.transferNFT(token, address(this), receiver, serialNumber);
-
-        if(response != HederaResponseCodes.SUCCESS){
-            revert("Failed to transfer non-fungible token");
-        }
-
-        return serialNumber;
     }
 
 }

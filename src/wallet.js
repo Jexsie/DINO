@@ -6,30 +6,27 @@ import {
 } from "@hashgraph/hedera-wallet-connect";
 import {
   LedgerId,
-  ContractExecuteTransaction,
-  ContractFunctionParameters,
   AccountId,
+  TokenAssociateTransaction,
+  TokenId,
 } from "@hashgraph/sdk";
+import { Buffer } from "buffer";
 
-// --- App metadata & config ---
-const PROJECT_ID = "5eb71c9e42a74b55e2f20d34430bfd82"; // <-- put your WC project id here
-const LEDGER = LedgerId.TESTNET; // testnet as requested
+window.Buffer = Buffer;
+
+const LEDGER = LedgerId.TESTNET;
+const PROJECT_ID = process.env.PROJECT_ID;
+const PINATA_GATEWAY = process.env.PINATA_GATEWAY;
+const TOKEN_ID = TokenId.fromString(process.env.TOKEN_ID);
 
 const metadata = {
   name: "Dino - Blockchain Game",
-  description: "Pixel Dino on Hedera 🎮",
+  description: "Pixel Dino on Hedera",
   url: window.location.origin,
   icons: [window.location.origin + "/icon.png"],
 };
 
-const CID = [
-  "bafkreifuscueitkigrok6k6x4wmil2n52nki4sis3u7h3k6hexekrp7yte",
-  "bafkreicuj6i5iggvkrsduy4ii52e4xzk7hulntfxywaos66xuwfzesi7hy",
-  "bafkreidtyyug6yhvwbbnk3efiguavl5colwlvuatlrihogkcrdcl6p2f6u",
-];
-
-// --- Make sure we only EVER create one connector & one modal in the page life cycle
-function getConnectorSingleton() {
+export function getConnectorSingleton() {
   if (window.__HEDERA_WC__?.connector) return window.__HEDERA_WC__.connector;
 
   const connector = new DAppConnector(
@@ -41,12 +38,11 @@ function getConnectorSingleton() {
     [HederaChainId.Testnet]
   );
 
-  // Save globally so HMR/re-imports reuse the same instance (prevents double <wcm-*> defines)
   window.__HEDERA_WC__ = { connector, initPromise: null };
   return connector;
 }
 
-// --- Initialize only once
+/******* Initialize only once ****/
 export async function initWallet() {
   const wc = window.__HEDERA_WC__ || {};
   const connector = getConnectorSingleton();
@@ -57,25 +53,23 @@ export async function initWallet() {
   }
   await wc.initPromise;
 
-  // Return existing account (if session already active)
   const signer = connector.signers?.[0];
   return signer?.getAccountId()?.toString() || null;
 }
 
-// --- Open QR modal and connect
+/******  Opens QR modal to connect *****/
 export async function connectWallet() {
   const connector = getConnectorSingleton();
   await initWallet();
 
   try {
     console.log("Opening WalletConnect modal...");
-    await connector.openModal(); // shows QR modal
+    await connector.openModal();
   } catch (e) {
     console.warn("Connect cancelled:", e.message || e);
     return null;
   }
 
-  // Wait for signer to appear (sometimes it's async after approval)
   let signer = null;
   for (let i = 0; i < 10; i++) {
     signer = connector.signers?.[0];
@@ -93,7 +87,6 @@ export async function connectWallet() {
   return accountId;
 }
 
-// --- Disconnect all sessions & pairings
 export async function disconnectWallet() {
   const connector = getConnectorSingleton();
   try {
@@ -105,7 +98,7 @@ export async function disconnectWallet() {
   return true;
 }
 
-// --- Subscribe to wallet state changes (optional)
+/*********  Subscribe to wallet state changes *****/
 export function onWalletEvents({ onChange }) {
   const connector = getConnectorSingleton();
   const safeUpdate = () => {
@@ -113,7 +106,6 @@ export function onWalletEvents({ onChange }) {
     onChange?.(s ? s.getAccountId().toString() : null);
   };
 
-  // After init, hook into walletconnect client events
   (async () => {
     await initWallet();
     connector.walletConnectClient?.on("session_update", safeUpdate);
@@ -125,31 +117,92 @@ export function onWalletEvents({ onChange }) {
   })();
 }
 
-// Convert "0.0.x" to solidity address
-function accountIdToSolidityAddress(accountId) {
-  return "0x" + AccountId.fromString(accountId).toSolidityAddress();
+export async function requestAssociation() {
+  const connector = getConnectorSingleton();
+  const signer = connector.signers[0];
+  const accountId = signer.getAccountId().toString();
+
+  const tx = await new TokenAssociateTransaction()
+    .setAccountId(accountId)
+    .setTokenIds([TOKEN_ID])
+    .freezeWithSigner(signer);
+
+  const res = await tx.executeWithSigner(signer);
+  console.log("Association Tx:", res.transactionId.toString());
+  return res;
 }
 
-async function mintForHighScore({
-  connector,
-  playerAccountId,
-  metadataUri,
-  contractId,
-}) {
-  const signer = connector.signers[0];
-  const recipientSol = accountIdToSolidityAddress(playerAccountId);
-
-  const tx = new ContractExecuteTransaction()
-    .setContractId(contractId) // "0.0.contractId"
-    .setGas(600_000) // adjust if needed
-    .setFunction(
-      "mintAndSend",
-      new ContractFunctionParameters()
-        .addAddress(recipientSol) // solidity address (0x…)
-        .addString(metadataUri) // e.g. ipfs://CID/metadata.json
+export async function mintForHighScore() {
+  try {
+    const response = await fetch(
+      `http://localhost:3000/api/mint-nft/${AccountId.fromString(
+        window.currentWallet.accountId
+      ).toSolidityAddress()}`
     );
 
-  await tx.freezeWithSigner(signer);
-  const res = await tx.executeWithSigner(signer);
-  console.log("Mint tx:", res.transactionId.toString());
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || "Backend minting failed.");
+    }
+
+    const { serial } = await response.json();
+    console.log("Minted NFT with serial:", serial);
+  } catch (error) {
+    console.error("Error during mint and transfer:", error);
+  }
+}
+
+export async function getNftsForUser(accountId) {
+  const results = [];
+
+  try {
+    const res = await fetch(
+      `https://testnet.mirrornode.hedera.com/api/v1/accounts/${accountId}/nfts?limit=4&order=asc&token.id=${TOKEN_ID.toString()}`
+    );
+
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.error || "Backend minting failed.");
+    }
+
+    const data = await res.json();
+
+    for (const nft of data?.nfts) {
+      try {
+        const url = decodeMetadata(nft.metadata);
+        const metadata = await fetchMetadata(normalizeIpfsUri(url));
+        results.push({
+          ...metadata,
+          tokenId: nft.token_id,
+          serial: nft.serial_number,
+        });
+      } catch (err) {
+        console.error("Failed to fetch metadata for NFT", nft, err);
+      }
+    }
+    return results;
+  } catch {}
+}
+
+async function fetchMetadata(url) {
+  const response = await fetch(url);
+  return await response.json();
+}
+
+function decodeMetadata(base64Metadata) {
+  const buff = Buffer.from(base64Metadata, "base64");
+  return buff.toString("utf-8");
+}
+
+export function normalizeIpfsUri(uri) {
+  if (!uri) return null;
+
+  // Remove the "ipfs://" prefix
+  if (uri.startsWith("ipfs://")) {
+    const cid = uri.replace("ipfs://", "");
+    return `${PINATA_GATEWAY}/ipfs/${cid}`;
+  }
+
+  // Already an HTTP(S) link
+  return uri;
 }

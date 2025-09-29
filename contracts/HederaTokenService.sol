@@ -6,7 +6,7 @@ import "./HederaResponseCodes.sol";
 import "./IHederaTokenService.sol";
 
 abstract contract HederaTokenService {
-    address constant precompileAddress = address(0x16c);
+    address constant precompileAddress = address(0x167);
     // 90 days in seconds
     int32 constant defaultAutoRenewPeriod = 7776000;
 
@@ -50,11 +50,11 @@ abstract contract HederaTokenService {
     {
         (bool success, bytes memory result) = precompileAddress.call(
             abi.encodeWithSelector(IHederaTokenService.mintToken.selector,
-                token, amount, metadata));
+            token, amount, metadata));
         (responseCode, newTotalSupply, serialNumbers) =
-            success
-                ? abi.decode(result, (int32, int64, int64[]))
-                : (HederaResponseCodes.UNKNOWN, int64(0), new int64[](0));
+        success
+        ? abi.decode(result, (int32, int64, int64[]))
+        : (HederaResponseCodes.UNKNOWN, int64(0), new int64[](0));
     }
 
     /// Burns an amount of the token from the defined treasury account
@@ -71,11 +71,11 @@ abstract contract HederaTokenService {
     {
         (bool success, bytes memory result) = precompileAddress.call(
             abi.encodeWithSelector(IHederaTokenService.burnToken.selector,
-                token, amount, serialNumbers));
+            token, amount, serialNumbers));
         (responseCode, newTotalSupply) =
-            success
-                ? abi.decode(result, (int32, int64))
-                : (HederaResponseCodes.UNKNOWN, int64(0));
+        success
+        ? abi.decode(result, (int32, int64))
+        : (HederaResponseCodes.UNKNOWN, int64(0));
     }
 
     ///  Associates the provided account with the provided tokens. Must be signed by the provided
@@ -98,14 +98,14 @@ abstract contract HederaTokenService {
     function associateTokens(address account, address[] memory tokens) internal returns (int responseCode) {
         (bool success, bytes memory result) = precompileAddress.call(
             abi.encodeWithSelector(IHederaTokenService.associateTokens.selector,
-                account, tokens));
+            account, tokens));
         responseCode = success ? abi.decode(result, (int32)) : HederaResponseCodes.UNKNOWN;
     }
 
     function associateToken(address account, address token) internal returns (int responseCode) {
         (bool success, bytes memory result) = precompileAddress.call(
             abi.encodeWithSelector(IHederaTokenService.associateToken.selector,
-                account, token));
+            account, token));
         responseCode = success ? abi.decode(result, (int32)) : HederaResponseCodes.UNKNOWN;
     }
 
@@ -130,14 +130,14 @@ abstract contract HederaTokenService {
     function dissociateTokens(address account, address[] memory tokens) internal returns (int responseCode) {
         (bool success, bytes memory result) = precompileAddress.call(
             abi.encodeWithSelector(IHederaTokenService.dissociateTokens.selector,
-                account, tokens));
+            account, tokens));
         responseCode = success ? abi.decode(result, (int32)) : HederaResponseCodes.UNKNOWN;
     }
 
     function dissociateToken(address account, address token) internal returns (int responseCode) {
         (bool success, bytes memory result) = precompileAddress.call(
             abi.encodeWithSelector(IHederaTokenService.dissociateToken.selector,
-                account, token));
+            account, token));
         responseCode = success ? abi.decode(result, (int32)) : HederaResponseCodes.UNKNOWN;
     }
 
@@ -155,7 +155,7 @@ abstract contract HederaTokenService {
     internal returns (int responseCode, address tokenAddress) {
         (bool success, bytes memory result) = precompileAddress.call{value : msg.value}(
             abi.encodeWithSelector(IHederaTokenService.createFungibleToken.selector,
-                token, initialTotalSupply, decimals));
+            token, initialTotalSupply, decimals));
 
 
         (responseCode, tokenAddress) = success ? abi.decode(result, (int32, address)) : (HederaResponseCodes.UNKNOWN, address(0));
@@ -179,7 +179,7 @@ abstract contract HederaTokenService {
     internal returns (int responseCode, address tokenAddress) {
         (bool success, bytes memory result) = precompileAddress.call{value : msg.value}(
             abi.encodeWithSelector(IHederaTokenService.createFungibleTokenWithCustomFees.selector,
-                token, initialTotalSupply, decimals, fixedFees, fractionalFees));
+            token, initialTotalSupply, decimals, fixedFees, fractionalFees));
         (responseCode, tokenAddress) = success ? abi.decode(result, (int32, address)) : (HederaResponseCodes.UNKNOWN, address(0));
     }
 
@@ -207,7 +207,7 @@ abstract contract HederaTokenService {
     internal returns (int responseCode, address tokenAddress) {
         (bool success, bytes memory result) = precompileAddress.call{value : msg.value}(
             abi.encodeWithSelector(IHederaTokenService.createNonFungibleTokenWithCustomFees.selector,
-                token, fixedFees, royaltyFees));
+            token, fixedFees, royaltyFees));
         (responseCode, tokenAddress) = success ? abi.decode(result, (int32, address)) : (HederaResponseCodes.UNKNOWN, address(0));
     }
 
@@ -258,9 +258,9 @@ abstract contract HederaTokenService {
         IHederaTokenService.FractionalFee[] memory defaultFractionalFees;
         IHederaTokenService.RoyaltyFee[] memory defaultRoyaltyFees;
         (responseCode, fixedFees, fractionalFees, royaltyFees) =
-            success ? abi.decode
-            (result, (int32, IHederaTokenService.FixedFee[], IHederaTokenService.FractionalFee[], IHederaTokenService.RoyaltyFee[]))
-                : (HederaResponseCodes.UNKNOWN, defaultFixedFees, defaultFractionalFees, defaultRoyaltyFees);
+        success ? abi.decode
+        (result, (int32, IHederaTokenService.FixedFee[], IHederaTokenService.FractionalFee[], IHederaTokenService.RoyaltyFee[]))
+        : (HederaResponseCodes.UNKNOWN, defaultFixedFees, defaultFractionalFees, defaultRoyaltyFees);
     }
 
     /// Allows spender to withdraw from your account multiple times, up to the value amount. If this function is called
@@ -274,7 +274,7 @@ abstract contract HederaTokenService {
     {
         (bool success, bytes memory result) = precompileAddress.call(
             abi.encodeWithSelector(IHederaTokenService.approve.selector,
-                token, spender, amount));
+            token, spender, amount));
         responseCode = success ? abi.decode(result, (int32)) : HederaResponseCodes.UNKNOWN;
     }
 
@@ -290,7 +290,7 @@ abstract contract HederaTokenService {
     {
         (bool success, bytes memory result) = precompileAddress.call(
             abi.encodeWithSelector(IHederaTokenService.transferFrom.selector,
-                token, from, to, amount));
+            token, from, to, amount));
         responseCode = success ? abi.decode(result, (int32)) : HederaResponseCodes.UNKNOWN;
     }
 
@@ -305,7 +305,7 @@ abstract contract HederaTokenService {
     {
         (bool success, bytes memory result) = precompileAddress.call(
             abi.encodeWithSelector(IHederaTokenService.transferFromNFT.selector,
-                token, from, to, serialNumber));
+            token, from, to, serialNumber));
         responseCode = success ? abi.decode(result, (int32)) : HederaResponseCodes.UNKNOWN;
     }
 
@@ -319,7 +319,7 @@ abstract contract HederaTokenService {
     {
         (bool success, bytes memory result) = precompileAddress.call(
             abi.encodeWithSelector(IHederaTokenService.allowance.selector,
-                token, owner, spender));
+            token, owner, spender));
         (responseCode, amount) = success ? abi.decode(result, (int32, uint256)) : (HederaResponseCodes.UNKNOWN, 0);
     }
 
@@ -333,7 +333,7 @@ abstract contract HederaTokenService {
     {
         (bool success, bytes memory result) = precompileAddress.call(
             abi.encodeWithSelector(IHederaTokenService.approveNFT.selector,
-                token, approved, serialNumber));
+            token, approved, serialNumber));
         responseCode = success ? abi.decode(result, (int32)) : HederaResponseCodes.UNKNOWN;
     }
 
@@ -347,11 +347,11 @@ abstract contract HederaTokenService {
     {
         (bool success, bytes memory result) = precompileAddress.call(
             abi.encodeWithSelector(IHederaTokenService.getApproved.selector,
-                token, serialNumber));
+            token, serialNumber));
         (responseCode, approved) =
-            success
-                ? abi.decode(result, (int32, address))
-                : (HederaResponseCodes.UNKNOWN, address(0));
+        success
+        ? abi.decode(result, (int32, address))
+        : (HederaResponseCodes.UNKNOWN, address(0));
     }
 
     /// Query if token account is frozen
@@ -428,7 +428,7 @@ abstract contract HederaTokenService {
     {
         (bool success, bytes memory result) = precompileAddress.call(
             abi.encodeWithSelector(IHederaTokenService.setApprovalForAll.selector,
-                token, operator, approved));
+            token, operator, approved));
         responseCode = success ? abi.decode(result, (int32)) : HederaResponseCodes.UNKNOWN;
     }
 
@@ -443,11 +443,11 @@ abstract contract HederaTokenService {
     {
         (bool success, bytes memory result) = precompileAddress.call(
             abi.encodeWithSelector(IHederaTokenService.isApprovedForAll.selector,
-                token, owner, operator));
+            token, owner, operator));
         (responseCode, approved) =
-            success
-                ? abi.decode(result, (int32, bool))
-                : (HederaResponseCodes.UNKNOWN, false);
+        success
+        ? abi.decode(result, (int32, bool))
+        : (HederaResponseCodes.UNKNOWN, false);
     }
 
     /// Query token default freeze status
@@ -485,7 +485,7 @@ abstract contract HederaTokenService {
     {
         (bool success, bytes memory result) = precompileAddress.call(
             abi.encodeWithSelector(IHederaTokenService.transferTokens.selector,
-                token, accountIds, amounts));
+            token, accountIds, amounts));
         responseCode = success ? abi.decode(result, (int32)) : HederaResponseCodes.UNKNOWN;
     }
 
@@ -499,7 +499,7 @@ abstract contract HederaTokenService {
     {
         (bool success, bytes memory result) = precompileAddress.call(
             abi.encodeWithSelector(IHederaTokenService.transferNFTs.selector,
-                token, sender, receiver, serialNumber));
+            token, sender, receiver, serialNumber));
         responseCode = success ? abi.decode(result, (int32)) : HederaResponseCodes.UNKNOWN;
     }
 
@@ -515,7 +515,7 @@ abstract contract HederaTokenService {
     {
         (bool success, bytes memory result) = precompileAddress.call(
             abi.encodeWithSelector(IHederaTokenService.transferToken.selector,
-                token, sender, receiver, amount));
+            token, sender, receiver, amount));
         responseCode = success ? abi.decode(result, (int32)) : HederaResponseCodes.UNKNOWN;
     }
 
@@ -531,7 +531,7 @@ abstract contract HederaTokenService {
     {
         (bool success, bytes memory result) = precompileAddress.call(
             abi.encodeWithSelector(IHederaTokenService.transferNFT.selector,
-                token, sender, receiver, serialNumber));
+            token, sender, receiver, serialNumber));
         responseCode = success ? abi.decode(result, (int32)) : HederaResponseCodes.UNKNOWN;
     }
 
@@ -743,13 +743,6 @@ abstract contract HederaTokenService {
     function rejectTokens(address rejectingAddress, address[] memory ftAddresses, IHederaTokenService.NftID[] memory nftIds) internal returns (int64 responseCode) {
         (bool success, bytes memory result) = precompileAddress.call(
             abi.encodeWithSelector(IHederaTokenService.rejectTokens.selector, rejectingAddress, ftAddresses, nftIds)
-        );
-        (responseCode) = success ? abi.decode(result, (int32)) : HederaResponseCodes.UNKNOWN;
-    }
-
-    function updateNFTsMetadata(address nftToken, int64[] memory serialNumbers, bytes memory metadata) external returns (int64 responseCode) {
-        (bool success, bytes memory result) = precompileAddress.call(
-            abi.encodeWithSelector(IHederaTokenService.updateNFTsMetadata.selector, nftToken, serialNumbers, metadata)
         );
         (responseCode) = success ? abi.decode(result, (int32)) : HederaResponseCodes.UNKNOWN;
     }

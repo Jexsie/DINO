@@ -1,24 +1,44 @@
 const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
+const webpack = require("webpack");
+
+const dotenv = require("dotenv").config({ path: __dirname + "/.env" });
+const isDevelopment = process.env.NODE_ENV !== "production";
 
 module.exports = {
-  entry: "./src/bootstrap.js", // your existing entry
+  entry: "./src/bootstrap.js",
   output: {
-    path: path.resolve(__dirname, "./dist"), // build output folder
+    path: path.resolve(__dirname, "./dist"),
     filename: "output.js",
     clean: true,
   },
-  mode: "development", // switch to production for final build
+  mode: "development",
   devServer: {
     static: {
-      directory: path.join(__dirname, "./assets"), // serve files from www
+      directory: path.join(__dirname, "./assets"),
     },
     port: 8080,
     open: true,
+    // proxy: [
+    //   // The proxy option now expects an array
+    //   {
+    //     context: ["/api"], // The path to match
+    //     target: "http://localhost:3001", // Your Express server
+    //     // This ensures the Host header is changed for the target server
+    //     changeOrigin: true,
+    //   },
+    // ],
   },
   plugins: [
     new HtmlWebpackPlugin({
-      template: "./src/index.html", // points to your game HTML
+      template: "./src/index.html",
     }),
-  ],
+    new webpack.DefinePlugin({
+      "process.env": JSON.stringify(dotenv.parsed),
+      "process.env.NODE_ENV": JSON.stringify(
+        isDevelopment ? "development" : "production"
+      ),
+      Buffer: ["buffer", "Buffer"],
+    }),
+  ].filter(Boolean),
 };

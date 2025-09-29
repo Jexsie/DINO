@@ -9,30 +9,6 @@
 				"inputs": [
 					{
 						"internalType": "address",
-						"name": "account",
-						"type": "address"
-					},
-					{
-						"internalType": "address",
-						"name": "token",
-						"type": "address"
-					}
-				],
-				"name": "associateToken",
-				"outputs": [
-					{
-						"internalType": "int64",
-						"name": "responseCode",
-						"type": "int64"
-					}
-				],
-				"stateMutability": "nonpayable",
-				"type": "function"
-			},
-			{
-				"inputs": [
-					{
-						"internalType": "address",
 						"name": "token",
 						"type": "address"
 					},
@@ -131,11 +107,11 @@
 	},
 	"sources": {
 		"contracts/dino-nft-mint.sol": {
-			"keccak256": "0x5e2c12ab92bbf287f33876f6b4070a41e04591179830b5fb209f7b94a0e6f2da",
+			"keccak256": "0x7f61d2c6fe2667364b33c2459591420b1bc55190069ca2e36449c1c3d3d5d018",
 			"license": "Apache-2.0",
 			"urls": [
-				"bzz-raw://a8919d094e1157fe54ce09aa648313692544412dc9446c960242da969bc5eadd",
-				"dweb:/ipfs/QmXKHSiEkfiEGeMGJrj2ioWJ1X38MwNWR7M6rqnayFywmv"
+				"bzz-raw://770bc41914f1537a1374d9aa3c1782db4ddd3059f9a7c8e413258dca83547ee6",
+				"dweb:/ipfs/Qma53jwfzMgQ9ZwUBqQTztGgppXGbQ36HbqQng9WgtjBZj"
 			]
 		}
 	},

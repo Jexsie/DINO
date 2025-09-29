@@ -6,8 +6,7 @@ import "./HederaTokenService.sol";
 
 abstract contract KeyHelper {
     using Bits for uint256;
-
-    address supplyContract;
+    address supplyContract = 0x0000000000000000000000000000000000000000;
 
     mapping(KeyType => uint256) keyTypes;
 
@@ -18,10 +17,8 @@ abstract contract KeyHelper {
         WIPE,
         SUPPLY,
         FEE,
-        PAUSE,
-        METADATA
+        PAUSE
     }
-
     enum KeyValueType {
         INHERIT_ACCOUNT_KEY,
         CONTRACT_ID,
@@ -38,7 +35,6 @@ abstract contract KeyHelper {
         keyTypes[KeyType.SUPPLY] = 16;
         keyTypes[KeyType.FEE] = 32;
         keyTypes[KeyType.PAUSE] = 64;
-        keyTypes[KeyType.METADATA] = 128;
     }
 
     function getDefaultKeys() internal view returns (IHederaTokenService.TokenKey[] memory keys) {
@@ -50,17 +46,30 @@ abstract contract KeyHelper {
         );
     }
 
-    function getAllTypeKeys(KeyValueType keyValueType, bytes memory key) internal view returns (IHederaTokenService.TokenKey[] memory keys) {
+    function getAllTypeKeys(KeyValueType keyValueType, bytes memory key)
+        internal
+        view
+        returns (IHederaTokenService.TokenKey[] memory keys)
+    {
         keys = new IHederaTokenService.TokenKey[](1);
         keys[0] = IHederaTokenService.TokenKey(getAllKeyTypes(), getKeyValueType(keyValueType, key));
     }
 
-    function getCustomSingleTypeKeys(KeyType keyType, KeyValueType keyValueType, bytes memory key) internal view returns (IHederaTokenService.TokenKey[] memory keys) {
+    function getCustomSingleTypeKeys(
+        KeyType keyType,
+        KeyValueType keyValueType,
+        bytes memory key
+    ) internal view returns (IHederaTokenService.TokenKey[] memory keys) {
         keys = new IHederaTokenService.TokenKey[](1);
         keys[0] = IHederaTokenService.TokenKey(getKeyType(keyType), getKeyValueType(keyValueType, key));
     }
 
-    function getCustomDuplexTypeKeys(KeyType firstType, KeyType secondType, KeyValueType keyValueType, bytes memory key) internal view returns (IHederaTokenService.TokenKey[] memory keys) {
+    function getCustomDuplexTypeKeys(
+        KeyType firstType,
+        KeyType secondType,
+        KeyValueType keyValueType,
+        bytes memory key
+    ) internal view returns (IHederaTokenService.TokenKey[] memory keys) {
         keys = new IHederaTokenService.TokenKey[](1);
         keys[0] = IHederaTokenService.TokenKey(
             getDuplexKeyType(firstType, secondType),
@@ -68,15 +77,28 @@ abstract contract KeyHelper {
         );
     }
 
-    function getSingleKey(KeyType keyType, KeyValueType keyValueType, bytes memory key) internal view returns (IHederaTokenService.TokenKey memory tokenKey) {
+    function getSingleKey(
+        KeyType keyType,
+        KeyValueType keyValueType,
+        bytes memory key
+    ) internal view returns (IHederaTokenService.TokenKey memory tokenKey) {
         tokenKey = IHederaTokenService.TokenKey(getKeyType(keyType), getKeyValueType(keyValueType, key));
     }
 
-    function getSingleKey(KeyType keyType, KeyValueType keyValueType, address key) internal view returns (IHederaTokenService.TokenKey memory tokenKey) {
+    function getSingleKey(
+        KeyType keyType,
+        KeyValueType keyValueType,
+        address key
+    ) internal view returns (IHederaTokenService.TokenKey memory tokenKey) {
         tokenKey = IHederaTokenService.TokenKey(getKeyType(keyType), getKeyValueType(keyValueType, key));
     }
 
-    function getSingleKey(KeyType firstType, KeyType secondType, KeyValueType keyValueType, bytes memory key) internal view returns (IHederaTokenService.TokenKey memory tokenKey) {
+    function getSingleKey(
+        KeyType firstType,
+        KeyType secondType,
+        KeyValueType keyValueType,
+        bytes memory key
+    ) internal view returns (IHederaTokenService.TokenKey memory tokenKey) {
         tokenKey = IHederaTokenService.TokenKey(
             getDuplexKeyType(firstType, secondType),
             getKeyValueType(keyValueType, key)
@@ -96,14 +118,17 @@ abstract contract KeyHelper {
         keyType = keyType.setBit(uint8(KeyType.SUPPLY));
         keyType = keyType.setBit(uint8(KeyType.FEE));
         keyType = keyType.setBit(uint8(KeyType.PAUSE));
-        keyType = keyType.setBit(uint8(KeyType.METADATA));
     }
 
     function getKeyType(KeyType keyType) internal view returns (uint256) {
         return keyTypes[keyType];
     }
 
-    function getKeyValueType(KeyValueType keyValueType, bytes memory key) internal view returns (IHederaTokenService.KeyValue memory keyValue) {
+    function getKeyValueType(KeyValueType keyValueType, bytes memory key)
+        internal
+        view
+        returns (IHederaTokenService.KeyValue memory keyValue)
+    {
         if (keyValueType == KeyValueType.INHERIT_ACCOUNT_KEY) {
             keyValue.inheritAccountKey = true;
         } else if (keyValueType == KeyValueType.CONTRACT_ID) {
@@ -117,7 +142,11 @@ abstract contract KeyHelper {
         }
     }
 
-    function getKeyValueType(KeyValueType keyValueType, address keyAddress) internal pure returns (IHederaTokenService.KeyValue memory keyValue) {
+    function getKeyValueType(KeyValueType keyValueType, address keyAddress)
+        internal
+        pure
+        returns (IHederaTokenService.KeyValue memory keyValue)
+    {
         if (keyValueType == KeyValueType.CONTRACT_ID) {
             keyValue.contractId = keyAddress;
         } else if (keyValueType == KeyValueType.DELEGETABLE_CONTRACT_ID) {
@@ -128,6 +157,7 @@ abstract contract KeyHelper {
 
 library Bits {
     uint256 internal constant ONE = uint256(1);
+
     // Sets the bit at the given 'index' in 'self' to '1'.
     // Returns the modified value.
     function setBit(uint256 self, uint8 index) internal pure returns (uint256) {

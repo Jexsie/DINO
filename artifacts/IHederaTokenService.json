@@ -49,36 +49,11 @@
 		},
 		"gasEstimates": null,
 		"methodIdentifiers": {
-			"associateToken(address,address)": "49146bde",
 			"mintToken(address,uint64,bytes[])": "278e0b88",
 			"transferToken(address,address,address,int64)": "eca36917"
 		}
 	},
 	"abi": [
-		{
-			"inputs": [
-				{
-					"internalType": "address",
-					"name": "account",
-					"type": "address"
-				},
-				{
-					"internalType": "address",
-					"name": "token",
-					"type": "address"
-				}
-			],
-			"name": "associateToken",
-			"outputs": [
-				{
-					"internalType": "int64",
-					"name": "responseCode",
-					"type": "int64"
-				}
-			],
-			"stateMutability": "nonpayable",
-			"type": "function"
-		},
 		{
 			"inputs": [
 				{
