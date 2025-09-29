@@ -382,12 +382,17 @@ function initialize() {
   document.ontouchstart = null;
   document.body.onclick = null;
 
-  canvas.addEventListener("click", handleStartOrJump);
+  // // ✅ Make click/touch behave like space (jump/start)
+  // canvas.addEventListener("click", (e) => {
+  //   e.preventDefault();
+  //   document.body.dispatchEvent(new KeyboardEvent("keydown", { key: " " }));
+  // });
+
   canvas.addEventListener(
     "touchstart",
     (e) => {
       e.preventDefault();
-      handleStartOrJump();
+      document.body.dispatchEvent(new KeyboardEvent("keydown", { key: " " }));
     },
     { passive: false }
   );
@@ -462,10 +467,10 @@ async function event_loop() {
 
     canvas_ctx.textBaseline = "middle";
     canvas_ctx.textAlign = "center";
-    canvas_ctx.font = "25px 'Press Start 2P'";
+    canvas_ctx.font = "15px 'Press Start 2P'";
     canvas_ctx.fillStyle = current_theme.info_text;
     canvas_ctx.fillText(
-      "J U M P   T O   S T A R T",
+      "PRESS SPACE TO START AND JUMP",
       canvas.width / 2,
       canvas.height / 2 - 50
     );
@@ -896,10 +901,10 @@ function repaintOnce() {
     }
     canvas_ctx.textBaseline = "middle";
     canvas_ctx.textAlign = "center";
-    canvas_ctx.font = "25px 'Press Start 2P'";
+    canvas_ctx.font = "15px 'Press Start 2P'";
     canvas_ctx.fillStyle = current_theme.info_text;
     canvas_ctx.fillText(
-      "J U M P   T O   S T A R T",
+      "PRESS SPACE TO START AND JUMP",
       canvas.width / 2,
       canvas.height / 2 - 50
     );
