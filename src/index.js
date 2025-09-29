@@ -41,10 +41,11 @@ import {
 // === CANVASES ===
 const canvas = document.getElementById("board");
 const canvas_ctx = canvas.getContext("2d");
+
+// FX overlay (for confetti)
 const fx = document.getElementById("fx");
 const fxCtx = fx.getContext("2d");
 
-// === CONSTANTS ===
 const CELL_SIZE = 2;
 const ROWS = 300;
 let COLUMNS = 1000;
@@ -59,37 +60,34 @@ if (screen.width < COLUMNS) {
 
 const DINO_INITIAL_TRUST = new Velocity(-11, 0);
 const ENVIRONMENT_GRAVITY = new Velocity(-0.6, 0);
+
+// y, x
 const DINO_FLOOR_INITIAL_POSITION = new Position(200, 20);
 
-// =================================================================
-// === GAME STATE MACHINE
-// =================================================================
-const GAME_STATES = {
-  READY: "ready",
-  RUNNING: "running",
-  OVER: "over",
-};
-let gameState = GAME_STATES.READY;
-let lastGameOverAt = 0; // cooldown marker
-
-// === GAME VARIABLES ===
+// === GAME STATE ===
 let dino_current_trust = new Velocity(0, 0);
 let dino_ready_to_jump = true;
+let game_over = false; // always boolean
+let game_over_at = null; // timestamp for when game ended
 let animationFrameId = null;
-let game_score = 0;
+let is_first_time = true;
+let game_score = null;
 let game_score_step = 0;
-let game_hi_score = 0;
+let game_hi_score = null;
 let step_velocity = new Velocity(0, -0.1);
-let cumulative_velocity = new Velocity(0, 0);
-let current_theme = themes.colorful;
+let cumulative_velocity = null;
+let current_theme = null;
 
-let harmless_characters_pool = [];
-let harmfull_characters_pool = [];
+let harmless_characters_pool = null;
+let harmfull_characters_pool = null;
 
+// pending celebrate flag to fire SFX after voice
 let pendingCelebrate = false;
 let celebrateFallbackTimer = null;
 
-// === CELEBRATE LISTENER ===
+// Optionally listen for a custom event fired by your audio module when the
+// game-over voice finishes. In your ./audio module, after the voice ends,
+// do: window.dispatchEvent(new Event('gameovervoiceended'));
 window.addEventListener("gameovervoiceended", () => {
   if (pendingCelebrate) {
     try {
@@ -320,15 +318,37 @@ let harmfull_character_allocator = [
   ),
 ];
 
-// === GAME LIFECYCLE ===
-function initializeNewGame() {
+// === INIT ===
+function initialize() {
+  const saved = localStorage.getItem("dino_theme");
+  if (saved) {
+    try {
+      current_theme = JSON.parse(saved);
+    } catch {
+      current_theme = themes.colorful;
+    }
+  } else {
+    current_theme = themes.colorful;
+  }
   cumulative_velocity = new Velocity(0, 0);
+  game_over = false;
+  game_over_at = null;
   game_score = 0;
-  game_score_step = 0;
-  dino_current_trust = new Velocity(0, 0);
-  dino_ready_to_jump = true;
 
-  // reset pools 🔑
+  pendingCelebrate = false;
+  if (celebrateFallbackTimer) {
+    clearTimeout(celebrateFallbackTimer);
+    celebrateFallbackTimer = null;
+  }
+
+  stopTrack();
+
+  game_hi_score = Number(
+    localStorage.getItem("project.github.chrome_dino.high_score") || 0
+  );
+
+  resizeCanvas();
+
   harmless_characters_pool = [];
   harmfull_characters_pool = [
     new Character(
@@ -341,70 +361,50 @@ function initializeNewGame() {
     ),
   ];
 
-  pendingCelebrate = false;
-  if (celebrateFallbackTimer) {
-    clearTimeout(celebrateFallbackTimer);
-    celebrateFallbackTimer = null;
+  function handleStartOrJump() {
+    if (game_over && game_over_at && Date.now() - game_over_at > 1000) {
+      main();
+      startTrack();
+      return;
+    }
+
+    if (is_first_time) {
+      startTrack();
+    }
+
+    if (dino_ready_to_jump) {
+      dino_ready_to_jump = false;
+      dino_current_trust = DINO_INITIAL_TRUST.clone();
+      playJump();
+    }
   }
-}
 
-function setup() {
-  const saved = localStorage.getItem("dino_theme");
-  try {
-    current_theme = saved ? JSON.parse(saved) : themes.colorful;
-  } catch {
-    current_theme = themes.colorful;
-  }
+  document.ontouchstart = null;
+  document.body.onclick = null;
 
-  game_hi_score = Number(
-    localStorage.getItem("project.github.chrome_dino.high_score") || 0
-  );
-
-  canvas.addEventListener("click", handleInput);
+  canvas.addEventListener("click", handleStartOrJump);
   canvas.addEventListener(
     "touchstart",
     (e) => {
       e.preventDefault();
-      handleInput();
+      handleStartOrJump();
     },
     { passive: false }
   );
-  document.body.addEventListener("keydown", (event) => {
+
+  document.body.onkeydown = (event) => {
     if (event.key === " " || event.keyCode === 32) {
       event.preventDefault();
-      handleInput();
+      handleStartOrJump();
     }
-  });
-
-  window.addEventListener("resize", resizeCanvas);
-  resizeCanvas();
-}
-
-function handleInput() {
-  switch (gameState) {
-    case GAME_STATES.READY:
-    case GAME_STATES.OVER:
-      if (Date.now() - lastGameOverAt > 1000) {
-        // 🔑 restart cooldown
-        gameState = GAME_STATES.RUNNING;
-        initializeNewGame();
-        startTrack();
-      }
-      break;
-    case GAME_STATES.RUNNING:
-      if (dino_ready_to_jump) {
-        dino_ready_to_jump = false;
-        dino_current_trust = DINO_INITIAL_TRUST.clone();
-        playJump();
-      }
-      break;
-  }
+  };
 }
 
 // === RENDER HELPERS ===
 function paint_layout(character_layout, character_position) {
   for (let j = 0; j < character_layout.length; j++) {
     for (let k = 0; k < character_layout[j].length; k++) {
+      // Look up the color from the theme palette
       if (current_theme.layout[character_layout[j][k]]) {
         canvas_ctx.fillStyle = current_theme.layout[character_layout[j][k]];
         let x_pos = character_position[1] + k * CELL_SIZE;
@@ -415,7 +415,26 @@ function paint_layout(character_layout, character_position) {
   }
 }
 
-function drawScore() {
+// === GAME LOOP ===
+async function event_loop() {
+  if (game_over) return;
+
+  game_score_step += 0.15;
+  if (game_score_step > 1) {
+    game_score_step -= 1;
+    game_score++;
+  }
+
+  canvas_ctx.clearRect(0, 0, canvas.width, canvas.height);
+  canvas_ctx.fillStyle = current_theme.background;
+  canvas_ctx.fillRect(0, 0, canvas.width, canvas.height);
+  canvas_ctx.beginPath();
+
+  // Road
+  canvas_ctx.fillStyle = current_theme.road;
+  canvas_ctx.fillRect(0, 232, canvas.width, CELL_SIZE * 0.2);
+
+  // score card
   const scoreText = `H I     ${Math.floor(game_hi_score)
     .toString()
     .padStart(4, "0")
@@ -425,198 +444,217 @@ function drawScore() {
     .padStart(4, "0")
     .split("")
     .join(" ")}`;
+
   canvas_ctx.font = "20px 'Press Start 2P'";
   canvas_ctx.fillStyle = current_theme.score_text;
   const textWidth = canvas_ctx.measureText(scoreText).width;
   canvas_ctx.fillText(scoreText, canvas.width - textWidth - 20, 30);
-}
 
-// === GAME LOOP ===
-function event_loop() {
-  canvas_ctx.clearRect(0, 0, canvas.width, canvas.height);
-  canvas_ctx.fillStyle = current_theme.background;
-  canvas_ctx.fillRect(0, 0, canvas.width, canvas.height);
-  canvas_ctx.beginPath();
-  canvas_ctx.fillStyle = current_theme.road;
-  canvas_ctx.fillRect(0, 232, canvas.width, CELL_SIZE * 0.2);
+  // first time screen
+  if (is_first_time) {
+    is_first_time = false;
+    paint_layout(
+      dino_layout.stand,
+      harmfull_characters_pool[0].get_position().get()
+    );
+    game_over = true;
+    game_over_at = Date.now();
 
-  switch (gameState) {
-    case GAME_STATES.READY:
-      drawScore();
-      paint_layout(dino_layout.stand, DINO_FLOOR_INITIAL_POSITION.get());
-      canvas_ctx.textBaseline = "middle";
-      canvas_ctx.textAlign = "center";
-      canvas_ctx.font = "25px 'Press Start 2P'";
-      canvas_ctx.fillStyle = current_theme.info_text;
-      canvas_ctx.fillText(
-        "J U M P   T O   S T A R T",
-        canvas.width / 2,
-        canvas.height / 2 - 50
-      );
-      break;
-
-    case GAME_STATES.RUNNING:
-      updateGameLogic();
-      break;
-
-    case GAME_STATES.OVER:
-      drawGameOverScreen();
-      break;
+    canvas_ctx.textBaseline = "middle";
+    canvas_ctx.textAlign = "center";
+    canvas_ctx.font = "25px 'Press Start 2P'";
+    canvas_ctx.fillStyle = current_theme.info_text;
+    canvas_ctx.fillText(
+      "J U M P   T O   S T A R T",
+      canvas.width / 2,
+      canvas.height / 2 - 50
+    );
+    return;
   }
 
-  animationFrameId = requestAnimationFrame(event_loop);
-}
-
-function updateGameLogic() {
-  if (gameState !== GAME_STATES.RUNNING) return; // 🔑
-
-  // increment score
-  game_score_step += 0.15;
-  if (game_score_step > 1) {
-    game_score_step -= 1;
-    game_score++;
-  }
-
-  if (game_score > 0 && game_score % 100 == 0) {
-    cumulative_velocity.add(step_velocity);
-  }
-
+  // characters
   [
     [harmless_character_allocator, harmless_characters_pool],
     [harmfull_character_allocator, harmfull_characters_pool],
   ].forEach(([allocators, pool]) => {
-    allocators.forEach((allocator) => {
-      allocator.tick();
-      const newChar = allocator.get_character();
-      if (newChar) {
-        newChar.get_velocity().add(cumulative_velocity);
-        pool.push(newChar);
+    for (let i = 0; i < allocators.length; i++) {
+      const ALLOCATOR = allocators[i];
+      ALLOCATOR.tick();
+      const RANDOM_CHARACTER = ALLOCATOR.get_character();
+      if (RANDOM_CHARACTER) {
+        RANDOM_CHARACTER.get_velocity().add(cumulative_velocity);
+        pool.push(RANDOM_CHARACTER);
       }
-    });
+    }
   });
 
+  if (game_score % 100 == 0) {
+    cumulative_velocity.add(step_velocity);
+  }
+
   [harmless_characters_pool, harmfull_characters_pool].forEach(
-    (pool, poolIndex) => {
+    (pool, index) => {
       for (let i = pool.length - 1; i >= 0; i--) {
-        if (
-          !(poolIndex === 1 && i === 0) &&
-          game_score > 0 &&
-          game_score % 100 == 0
-        ) {
+        if (!(index == 1 && i == 0) && game_score % 100 == 0) {
           pool[i].get_velocity().add(step_velocity);
         }
         pool[i].tick();
-        if (pool[i].get_position().get()[1] < -150) {
+        let layout = pool[i].get_layout();
+        if (!dino_ready_to_jump && index == 1 && i == 0) {
+          layout = dino_layout.stand;
+        }
+        const pos = pool[i].get_position().get();
+        if (pos[1] < -150) {
           pool.splice(i, 1);
           continue;
         }
-        let layout = pool[i].get_layout();
-        if (poolIndex === 1 && i === 0 && !dino_ready_to_jump) {
-          layout = dino_layout.stand;
-        }
-        paint_layout(layout, pool[i].get_position().get());
+        paint_layout(layout, pos);
       }
     }
   );
 
-  const dino = harmfull_characters_pool[0];
-  dino.set_position(
-    applyVelocityToPosition(dino.get_position(), dino_current_trust)
-  );
-  if (dino.get_position().get()[0] > DINO_FLOOR_INITIAL_POSITION.get()[0]) {
-    dino.set_position(DINO_FLOOR_INITIAL_POSITION.clone());
-    dino_ready_to_jump = true;
-  }
-  dino_current_trust.sub(ENVIRONMENT_GRAVITY);
-
-  const dino_pos = dino.get_position();
-  const dino_layout_val = dino.get_layout();
-  let has_collided = false;
+  // collisions
+  let dino_character = harmfull_characters_pool[0];
+  let dino_current_position = dino_character.get_position();
+  let dino_current_layout = dino_character.get_layout();
   for (let i = harmfull_characters_pool.length - 1; i > 0; i--) {
-    const obstacle = harmfull_characters_pool[i];
+    const otherPos = harmfull_characters_pool[i].get_position();
+    const otherLayout = harmfull_characters_pool[i].get_layout();
+
     if (
       isCollided(
-        dino_pos.get()[0],
-        dino_pos.get()[1],
-        dino_layout_val.length,
-        dino_layout_val[0].length,
-        obstacle.get_position().get()[0],
-        obstacle.get_position().get()[1],
-        obstacle.get_layout().length,
-        obstacle.get_layout()[0].length
+        dino_current_position.get()[0],
+        dino_current_position.get()[1],
+        dino_current_layout.length,
+        dino_current_layout[0].length,
+        otherPos.get()[0],
+        otherPos.get()[1],
+        otherLayout.length,
+        otherLayout[0].length
       )
     ) {
-      has_collided = true;
-      break;
-    }
-  }
-
-  if (has_collided) {
-    gameState = GAME_STATES.OVER;
-    lastGameOverAt = Date.now(); // 🔑 cooldown marker
-    stopTrack();
-    playGameOver();
-
-    if (game_score > game_hi_score) {
-      game_hi_score = game_score;
-      localStorage.setItem(
-        "project.github.chrome_dino.high_score",
-        String(game_hi_score)
+      canvas_ctx.textBaseline = "middle";
+      canvas_ctx.textAlign = "center";
+      canvas_ctx.font = "20px 'Press Start 2P'";
+      canvas_ctx.fillStyle = current_theme.info_text;
+      canvas_ctx.fillText(
+        "G A M E  O V E R",
+        canvas.width / 2,
+        canvas.height / 2 - 50
       );
 
-      celebrateCenter();
-      pendingCelebrate = true;
-      celebrateFallbackTimer = setTimeout(() => {
-        if (pendingCelebrate) {
-          try {
-            playCelebrate();
-          } catch {}
-          pendingCelebrate = false;
-          celebrateFallbackTimer = null;
-        }
-      }, 2500);
+      paint_layout(
+        retry_layout,
+        new Position(
+          canvas.height / 2 - retry_layout.length,
+          canvas.width / 2 - retry_layout[0].length
+        ).get()
+      );
+      paint_layout(
+        dino_layout.dead,
+        harmfull_characters_pool[0].get_position().get()
+      );
 
-      mintForHighScore()
-        .then(() => console.log("NFT minted successfully!"))
-        .catch(console.error);
+      game_over = true;
+      game_over_at = Date.now();
+
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+        animationFrameId = null;
+      }
+
+      stopTrack();
+
+      const prevHi = Number(
+        localStorage.getItem("project.github.chrome_dino.high_score") || 0
+      );
+      const isNewHi = game_score > prevHi;
+
+      if (isNewHi) {
+        localStorage.setItem(
+          "project.github.chrome_dino.high_score",
+          String(game_score)
+        );
+        game_hi_score = game_score;
+
+        canvas_ctx.textBaseline = "middle";
+        canvas_ctx.textAlign = "center";
+        canvas_ctx.font = "14px 'Press Start 2P'";
+        canvas_ctx.fillStyle = "#22c55e";
+        canvas_ctx.fillText(
+          "NEW HIGH SCORE!",
+          canvas.width / 2,
+          canvas.height / 2 - 80
+        );
+
+        celebrateCenter();
+        pendingCelebrate = true;
+        celebrateFallbackTimer = setTimeout(() => {
+          if (pendingCelebrate) {
+            try {
+              playCelebrate();
+            } catch {}
+            pendingCelebrate = false;
+            celebrateFallbackTimer = null;
+          }
+        }, 2500);
+
+        mintForHighScore()
+          .then(() => console.log("NFT minted successfully!"))
+          .catch(console.error);
+      }
+
+      try {
+        playGameOver();
+      } catch {}
+      return;
     }
   }
-  drawScore();
-}
 
-function drawGameOverScreen() {
-  drawScore();
-  harmfull_characters_pool[0].set_position(DINO_FLOOR_INITIAL_POSITION.clone());
-  paint_layout(
-    dino_layout.dead,
-    harmfull_characters_pool[0].get_position().get()
+  // dino physics
+  dino_character.set_position(
+    applyVelocityToPosition(dino_character.get_position(), dino_current_trust)
   );
-  canvas_ctx.textBaseline = "middle";
-  canvas_ctx.textAlign = "center";
-  canvas_ctx.font = "20px 'Press Start 2P'";
-  canvas_ctx.fillStyle = current_theme.info_text;
-  canvas_ctx.fillText(
-    "G A M E  O V E R",
-    canvas.width / 2,
-    canvas.height / 2 - 50
-  );
-  paint_layout(
-    retry_layout,
-    new Position(
-      canvas.height / 2 - retry_layout.length,
-      canvas.width / 2 - retry_layout[0].length
-    ).get()
-  );
+
+  if (
+    dino_character.get_position().get()[0] >
+    DINO_FLOOR_INITIAL_POSITION.get()[0]
+  ) {
+    dino_character.set_position(DINO_FLOOR_INITIAL_POSITION.clone());
+    dino_ready_to_jump = true;
+  }
+
+  dino_current_trust.sub(ENVIRONMENT_GRAVITY);
+
+  // animationFrameId = requestAnimationFrame(event_loop);
+
+  if (!game_over) {
+    animationFrameId = requestAnimationFrame(event_loop);
+  }
 }
 
 // === BOOT ===
 function main() {
-  if (animationFrameId) cancelAnimationFrame(animationFrameId);
-  setup();
+  if (animationFrameId) {
+    cancelAnimationFrame(animationFrameId);
+    animationFrameId = null;
+  }
+
+  game_over = false;
+  game_over_at = null;
+  pendingCelebrate = false;
+  if (celebrateFallbackTimer) {
+    clearTimeout(celebrateFallbackTimer);
+    celebrateFallbackTimer = null;
+  }
+
+  initialize();
   event_loop();
 }
 
-document.fonts.load('25px "Press Start 2P"').then(main);
+document.fonts.load('25px "Press Start 2P"').then(() => {
+  main();
+});
 
 // === RESIZE ===
 function resizeCanvas() {
@@ -624,11 +662,16 @@ function resizeCanvas() {
   canvas.width = parent.clientWidth;
   canvas.height = ROWS;
   COLUMNS = canvas.width;
+
   fx.width = canvas.width;
   fx.height = canvas.height;
+
+  repaintOnce();
 }
 
-// === THEME + NFT ===
+window.addEventListener("resize", resizeCanvas);
+
+// === NFT → THEME ===
 const traitToColor = {
   purple: "#a855f7",
   blue: "#3b82f6",
@@ -643,15 +686,18 @@ async function useNFT() {
   try {
     const response = await fetch("2.json");
     const metadata = await response.json();
+
     const bgAttr = metadata.attributes.find(
       (attr) => attr.trait_type === "background"
     );
     const clothingAttr = metadata.attributes.find(
       (attr) => attr.trait_type === "clothing"
     );
+
     const backgroundColor = traitToColor[bgAttr?.value] || "#ffffff";
     const clothingColor =
       traitToColor[clothingAttr?.value.split(" ")[0]] || "#535353";
+
     current_theme = {
       id: 99,
       background: backgroundColor,
@@ -660,15 +706,17 @@ async function useNFT() {
       info_text: "#000000",
       layout: [false, clothingColor, "#333333", "#ffffff", "#ff0000", false],
     };
+
     console.log("NFT theme applied:", current_theme);
     localStorage.setItem("dino_theme", JSON.stringify(current_theme));
+    repaintOnce();
   } catch (err) {
     console.error("Failed to load NFT:", err);
   }
 }
 window.useNFT = useNFT;
 
-// === CONFETTI ===
+// ===== CONFETTI (FX overlay) =====
 const CONFETTI_COLORS = [
   "#F59E0B",
   "#10B981",
@@ -714,6 +762,7 @@ function spawnConfettiBurst({
 
 function confettiLoop() {
   fxCtx.clearRect(0, 0, fx.width, fx.height);
+
   for (let i = confetti.length - 1; i >= 0; i--) {
     const p = confetti[i];
     p.vy += p.g;
@@ -721,14 +770,17 @@ function confettiLoop() {
     p.y += p.vy;
     p.rot += p.vr;
     p.life--;
+
     fxCtx.save();
     fxCtx.translate(p.x, p.y);
     fxCtx.rotate(p.rot);
     fxCtx.fillStyle = p.color;
     fxCtx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
     fxCtx.restore();
+
     if (p.life <= 0 || p.y > fx.height + 20) confetti.splice(i, 1);
   }
+
   if (confetti.length > 0) {
     requestAnimationFrame(confettiLoop);
   } else {
@@ -746,12 +798,14 @@ function celebrateCenter() {
   });
 }
 
-// === WALLET UI ===
+// Footer UI sync
 function updateWalletUI(accountId) {
   const wrap = document.getElementById("walletStatus");
   const idSpan = document.getElementById("walletId");
   const connectBtn = document.getElementById("connectWalletBtn");
+
   if (!wrap || !idSpan) return;
+
   if (accountId) {
     wrap.classList.remove("hidden");
     window.currentWallet = { accountId };
@@ -764,10 +818,16 @@ function updateWalletUI(accountId) {
   }
 }
 
+console.log("index.js loaded");
+
 (async function initUI() {
+  console.log("initUI running…");
+
   const existing = await initWallet();
   updateWalletUI(existing);
+
   onWalletEvents({ onChange: updateWalletUI });
+
   const connectBtn = document.getElementById("connectWalletBtn");
   if (connectBtn) {
     connectBtn.addEventListener("click", async () => {
@@ -775,9 +835,11 @@ function updateWalletUI(accountId) {
       updateWalletUI(acct);
     });
   }
+
   if (existing) {
     await populateThemeSlots();
   }
+
   const disBtn = document.getElementById("walletDisconnect");
   if (disBtn) {
     disBtn.addEventListener("click", async () => {
@@ -787,14 +849,100 @@ function updateWalletUI(accountId) {
   }
 })();
 
+function repaintOnce() {
+  if (!canvas || !canvas_ctx || !current_theme) return;
+
+  canvas_ctx.clearRect(0, 0, canvas.width, canvas.height);
+  canvas_ctx.fillStyle = current_theme.background;
+  canvas_ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  canvas_ctx.fillStyle = current_theme.road;
+  canvas_ctx.fillRect(0, 232, canvas.width, CELL_SIZE * 0.2);
+
+  const scoreText = `H I     ${Math.floor(game_hi_score)
+    .toString()
+    .padStart(4, "0")
+    .split("")
+    .join(" ")}     ${game_score
+    .toString()
+    .padStart(4, "0")
+    .split("")
+    .join(" ")}`;
+  canvas_ctx.font = "20px 'Press Start 2P'";
+  canvas_ctx.fillStyle = current_theme.score_text;
+  const textWidth = canvas_ctx.measureText(scoreText).width;
+  canvas_ctx.fillText(scoreText, canvas.width - textWidth - 20, 30);
+
+  [harmless_characters_pool, harmfull_characters_pool].forEach(
+    (pool, index) => {
+      if (!pool) return;
+      for (let i = 0; i < pool.length; i++) {
+        let layout = pool[i].get_layout();
+        if (!dino_ready_to_jump && index === 1 && i === 0) {
+          layout = dino_layout.stand;
+        }
+        const pos = pool[i].get_position().get();
+        paint_layout(layout, pos);
+      }
+    }
+  );
+
+  if (is_first_time) {
+    if (harmfull_characters_pool?.[0]) {
+      paint_layout(
+        dino_layout.stand,
+        harmfull_characters_pool[0].get_position().get()
+      );
+    }
+    canvas_ctx.textBaseline = "middle";
+    canvas_ctx.textAlign = "center";
+    canvas_ctx.font = "25px 'Press Start 2P'";
+    canvas_ctx.fillStyle = current_theme.info_text;
+    canvas_ctx.fillText(
+      "J U M P   T O   S T A R T",
+      canvas.width / 2,
+      canvas.height / 2 - 50
+    );
+    return;
+  }
+
+  if (game_over) {
+    canvas_ctx.textBaseline = "middle";
+    canvas_ctx.textAlign = "center";
+    canvas_ctx.font = "20px 'Press Start 2P'";
+    canvas_ctx.fillStyle = current_theme.info_text;
+    canvas_ctx.fillText(
+      "G A M E  O V E R",
+      canvas.width / 2,
+      canvas.height / 2 - 50
+    );
+
+    paint_layout(
+      retry_layout,
+      new Position(
+        canvas.height / 2 - retry_layout.length,
+        canvas.width / 2 - retry_layout[0].length
+      ).get()
+    );
+    if (harmfull_characters_pool?.[0]) {
+      paint_layout(
+        dino_layout.dead,
+        harmfull_characters_pool[0].get_position().get()
+      );
+    }
+  }
+}
+
 function applyNFTTheme(metadata) {
   const bgAttr = metadata.attributes.find((a) => a.trait_type === "background");
   const clothingAttr = metadata.attributes.find(
     (a) => a.trait_type === "clothing"
   );
+
   const backgroundColor = traitToColor[bgAttr?.value] || "#ffffff";
   const clothingColor =
     traitToColor[clothingAttr?.value?.split(" ")[0]] || "#535353";
+
   current_theme = {
     id: Date.now(),
     background: backgroundColor,
@@ -803,22 +951,28 @@ function applyNFTTheme(metadata) {
     info_text: "#000000",
     layout: [false, clothingColor, "#333333", "#ffffff", "#ff0000", false],
   };
+
   console.log("NFT theme applied:", current_theme);
   localStorage.setItem("dino_theme", JSON.stringify(current_theme));
+  repaintOnce();
 }
 
 async function populateThemeSlots() {
   try {
     const nfts = await getNftsForUser(window.currentWallet.accountId);
+
     const slots = document.querySelectorAll(".theme-slot");
+
     slots.forEach((slot, index) => {
       const nft = nfts[index];
       const img = slot.querySelector("img");
       const label = slot.querySelector("p");
+
       if (nft) {
         img.src = normalizeIpfsUri(nft.image) || "/dino.png";
         img.alt = nft.name || "NFT";
         label.textContent = nft.name || "Unnamed NFT";
+
         slot.dataset.metadata = JSON.stringify(nft);
         slot.onclick = () => applyNFTTheme(nft);
       } else {
