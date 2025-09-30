@@ -20,7 +20,7 @@ module.exports = {
     static: [
       {
         directory: path.join(__dirname, "./assets"),
-        publicPath: "/",
+        publicPath: "./",
       },
       {
         directory: path.join(__dirname, "./dist"),
