@@ -11,6 +11,7 @@ import {
   TokenId,
 } from "@hashgraph/sdk";
 import { Buffer } from "buffer";
+import { apiUrl } from "./constants";
 
 window.Buffer = Buffer;
 
@@ -137,7 +138,7 @@ export async function requestAssociation() {
 export async function mintForHighScore(highScore) {
   try {
     const response = await fetch(
-      `http://localhost:3000/api/mint-nft/${AccountId.fromString(
+      `${apiUrl}/api/mint-nft/${AccountId.fromString(
         window.currentWallet.accountId
       ).toSolidityAddress()}`
     );
@@ -188,7 +189,7 @@ export async function getNftsForUser(accountId) {
 
 async function submitScore(accountId, score) {
   try {
-    const response = await fetch("http://localhost:3000/score", {
+    const response = await fetch(apiUrl + "/score", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

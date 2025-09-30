@@ -1,4 +1,5 @@
 import { getNftsForUser, normalizeIpfsUri } from "./wallet";
+import { apiUrl } from "./constants";
 
 let leaderboardBtn,
   leaderboardModal,
@@ -136,7 +137,7 @@ function createLeaderTemplate(leader, idx) {
 
 async function loadLeaderboard() {
   try {
-    const response = await fetch("http://localhost:3000/leader");
+    const response = await fetch(apiUrl + "/leader");
     const leaders = await response.json();
     return leaders;
   } catch (error) {
