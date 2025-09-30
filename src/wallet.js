@@ -19,6 +19,8 @@ const PROJECT_ID = process.env.PROJECT_ID;
 const PINATA_GATEWAY = process.env.PINATA_GATEWAY;
 const TOKEN_ID = TokenId.fromString(process.env.TOKEN_ID);
 
+console.log(PROJECT_ID, "asdfsada");
+
 const metadata = {
   name: "Dino - Blockchain Game",
   description: "Pixel Dino on Hedera",
