@@ -124,6 +124,9 @@ export async function requestAssociation() {
   const connector = getConnectorSingleton();
   const signer = connector.signers[0];
   const accountId = signer.getAccountId().toString();
+  const isAssociated = await checkAssociation(accountId);
+
+  if (isAssociated) return;
 
   const tx = await new TokenAssociateTransaction()
     .setAccountId(accountId)
@@ -137,6 +140,7 @@ export async function requestAssociation() {
 
 export async function mintForHighScore(highScore) {
   try {
+    await requestAssociation();
     const response = await fetch(
       `${apiUrl}/api/mint-nft/${AccountId.fromString(
         window.currentWallet.accountId
@@ -211,6 +215,15 @@ async function submitScore(accountId, score) {
 async function fetchMetadata(url) {
   const response = await fetch(url);
   return await response.json();
+}
+
+async function checkAssociation(accountId) {
+  const url = `https://testnet.mirrornode.hedera.com/api/v1/accounts/${accountId}/tokens`;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error("Mirror Node error");
+  const data = await res.json();
+
+  return data.tokens.some((t) => t.token_id === TOKEN_ID.toString());
 }
 
 function decodeMetadata(base64Metadata) {

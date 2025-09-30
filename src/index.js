@@ -383,28 +383,6 @@ function initialize() {
   document.ontouchstart = null;
   document.body.onclick = null;
 
-  // // ✅ Make click/touch behave like space (jump/start)
-  // canvas.addEventListener("click", (e) => {
-  //   e.preventDefault();
-  //   document.body.dispatchEvent(new KeyboardEvent("keydown", { key: " " }));
-  // });
-
-  // canvas.addEventListener(
-  //   "touchstart",
-  //   (e) => {
-  //     e.preventDefault();
-  //     document.body.dispatchEvent(new KeyboardEvent("keydown", { key: " " }));
-  //   },
-  //   { passive: false }
-  // );
-
-  // document.body.onkeydown = (event) => {
-  //   if (event.key === " " || event.keyCode === 32) {
-  //     event.preventDefault();
-  //     handleStartOrJump();
-  //   }
-  // };
-
   function showWalletModal() {
     const walletModal = document.getElementById("walletModal");
     if (walletModal) walletModal.classList.remove("hidden");
@@ -626,11 +604,12 @@ async function event_loop() {
           if (modalFx) {
             modalFx.width = modal.offsetWidth;
             modalFx.height = modal.offsetHeight;
-            modalConfettiBurst({}); // 🎉 trigger confetti
+            modalConfettiBurst({});
           }
 
           closeModalButton.onclick = () => {
             modal.classList.add("hidden");
+            window.location.reload();
           };
         }
 
