@@ -280,7 +280,7 @@ const CACTUS_SMALL_S2 = [
   [0, 0, 0, 1, 2, 2, 2, 2, 1, 0, 0, 0],
   [0, 0, 0, 1, 2, 2, 2, 2, 1, 0, 0, 0],
 ];
-CACTUS_SMALL_D1 = [
+const CACTUS_SMALL_D1 = [
   [0, 0, 0, 1, 1, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 1, 1, 1, 1, 1],
   [0, 0, 0, 1, 2, 2, 2, 2, 1, 1, 2, 1, 1, 1, 2, 1, 1, 2, 2, 2, 2, 1, 1, 1, 1],
   [0, 0, 0, 1, 2, 2, 2, 2, 1, 2, 2, 2, 1, 2, 2, 2, 1, 2, 2, 2, 2, 1, 1, 2, 1],
@@ -483,93 +483,90 @@ const RETRY = [
   [1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1],
 ];
 
-module.exports = {
-  dino_layout: {
-    stand: DINO_STAND,
-    dead: DINO_DEAD,
-    run: [DINO_LEFT_LEG_UP, DINO_RIGHT_LEG_UP],
-    jump: DINO_STAND,
+export const dino_layout = {
+  stand: DINO_STAND,
+  dead: DINO_DEAD,
+  run: [DINO_LEFT_LEG_UP, DINO_RIGHT_LEG_UP],
+  jump: DINO_STAND,
+};
+export const road_layout = ROAD;
+export const cloud_layout = CLOUD;
+export const stone_layout = {
+  large: STONE_LARGE,
+  medium: STONE_MEDIUM,
+  small: STONE_SMALL,
+};
+export const pit_layout = {
+  large: PIT_LARGE,
+  up: PIT_UP,
+  down: PIT_DOWN,
+};
+export const bird_layout = {
+  fly: [
+    BIRD_WING_UP,
+    BIRD_WING_UP,
+    BIRD_WING_UP,
+    BIRD_WING_UP,
+    BIRD_WING_UP,
+    BIRD_WING_UP,
+    BIRD_WING_UP,
+    BIRD_WING_DOWN,
+    BIRD_WING_DOWN,
+    BIRD_WING_DOWN,
+    BIRD_WING_DOWN,
+    BIRD_WING_DOWN,
+    BIRD_WING_DOWN,
+    BIRD_WING_DOWN,
+  ],
+};
+export const cactus_layout = {
+  small_s1: CACTUS_SMALL_S1,
+  small_s2: CACTUS_SMALL_S2,
+  small_d1: CACTUS_SMALL_D1,
+  medium_s1: CACTUS_MEDIUM_S1,
+  medium_s2: CACTUS_MEDIUM_S2,
+  medium_d1: CACTUS_MEDIUM_D1,
+};
+export const star_layout = {
+  small_s1: STAR_SMALL_S1,
+  small_s2: STAR_SMALL_S2,
+};
+export const retry_layout = RETRY;
+export const themes = {
+  classic: {
+    id: 1,
+    background: "#ffffff",
+    road: "#535353",
+    score_text: "#747474",
+    info_text: "#535353",
+    layout: [false, "#ffffff", "#535353", "#dadada", "#535353", false],
   },
-  road_layout: ROAD,
-  cloud_layout: CLOUD,
-  stone_layout: {
-    large: STONE_LARGE,
-    medium: STONE_MEDIUM,
-    small: STONE_SMALL,
+  dark: {
+    id: 2,
+    background: "#202225",
+    road: "#acacac",
+    score_text: "#909191",
+    info_text: "#acacac",
+    layout: [false, "#202225", "#acacac", "#3e3f3f", "#acacac", "#3e3f3f"],
   },
-  pit_layout: {
-    large: PIT_LARGE,
-    up: PIT_UP,
-    down: PIT_DOWN,
-  },
-  bird_layout: {
-    fly: [
-      BIRD_WING_UP,
-      BIRD_WING_UP,
-      BIRD_WING_UP,
-      BIRD_WING_UP,
-      BIRD_WING_UP,
-      BIRD_WING_UP,
-      BIRD_WING_UP,
-      BIRD_WING_DOWN,
-      BIRD_WING_DOWN,
-      BIRD_WING_DOWN,
-      BIRD_WING_DOWN,
-      BIRD_WING_DOWN,
-      BIRD_WING_DOWN,
-      BIRD_WING_DOWN,
+  colorful: {
+    id: 3,
+    background: "#dbeafe", // light blue sky
+    road: "#7c3aed", // purple ground
+    score_text: "#1f2937", // dark gray text
+    info_text: "#1f2937",
+    layout: [
+      false, // 0 transparent
+      "#fbbf24", // 1 = yellow
+      "#ef4444", // 2 = red
+      "#3b82f6", // 3 = blue
+      "#22c55e", // 4 = green
+      "#a855f7", // 5 = purple
     ],
   },
-  cactus_layout: {
-    small_s1: CACTUS_SMALL_S1,
-    small_s2: CACTUS_SMALL_S2,
-    small_d1: CACTUS_SMALL_D1,
-    medium_s1: CACTUS_MEDIUM_S1,
-    medium_s2: CACTUS_MEDIUM_S2,
-    medium_d1: CACTUS_MEDIUM_D1,
-  },
-  star_layout: {
-    small_s1: STAR_SMALL_S1,
-    small_s2: STAR_SMALL_S2,
-  },
-  retry_layout: RETRY,
-  themes: {
-    classic: {
-      id: 1,
-      background: "#ffffff",
-      road: "#535353",
-      score_text: "#747474",
-      info_text: "#535353",
-      layout: [false, "#ffffff", "#535353", "#dadada", "#535353", false],
-    },
-    dark: {
-      id: 2,
-      background: "#202225",
-      road: "#acacac",
-      score_text: "#909191",
-      info_text: "#acacac",
-      layout: [false, "#202225", "#acacac", "#3e3f3f", "#acacac", "#3e3f3f"],
-    },
-    colorful: {
-      id: 3,
-      background: "#dbeafe", // light blue sky
-      road: "#7c3aed", // purple ground
-      score_text: "#1f2937", // dark gray text
-      info_text: "#1f2937",
-      layout: [
-        false, // 0 transparent
-        "#fbbf24", // 1 = yellow
-        "#ef4444", // 2 = red
-        "#3b82f6", // 3 = blue
-        "#22c55e", // 4 = green
-        "#a855f7", // 5 = purple
-      ],
-    },
-  },
-  loadNFTColor,
 };
 
-async function loadNFTColor(url) {
+export async function loadNFTColor(url) {
   const response = await fetch(url);
   const metadata = await response.json();
 
