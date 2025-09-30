@@ -1,8 +1,9 @@
 {
   "name": "dino",
   "scripts": {
-    "dev": "webpack-dev-server",
-    "build": "webpack --mode=production",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
     "start": "serve -s dist -l 8080"
   },
   "engines": {
@@ -13,6 +14,7 @@
     "copy-webpack-plugin": "^13.0.1",
     "mini-css-extract-plugin": "^2.9.4",
     "serve": "^14.2.5",
+    "vite": "^7.1.7",
     "webpack": "^5.101.3",
     "webpack-cli": "^6.0.1",
     "webpack-dev-server": "^5.2.2"

@@ -15,9 +15,9 @@ import { Buffer } from "buffer";
 window.Buffer = Buffer;
 
 const LEDGER = LedgerId.TESTNET;
-const PROJECT_ID = process.env.PROJECT_ID;
-const PINATA_GATEWAY = process.env.PINATA_GATEWAY;
-const TOKEN_ID = TokenId.fromString(process.env.TOKEN_ID);
+const PROJECT_ID = import.meta.env.VITE_PROJECT_ID;
+const PINATA_GATEWAY = import.meta.env.VITE_PINATA_GATEWAY;
+const TOKEN_ID = TokenId.fromString(import.meta.env.VITE_TOKEN_ID);
 
 console.log(PROJECT_ID, "asdfsada");
 
