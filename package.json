@@ -1,7 +1,8 @@
 {
   "name": "dino",
   "scripts": {
-    "start": "webpack-dev-server"
+    "start": "webpack-dev-server",
+    "build": "webpack --mode=production"
   },
   "devDependencies": {
     "webpack": "^5.101.3",
