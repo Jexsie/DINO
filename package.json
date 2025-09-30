@@ -5,6 +5,10 @@
     "build": "webpack --mode=production",
     "serve": "serve -s dist -l 8080"
   },
+  "engines": {
+    "node": ">=20.19.4",
+    "npm": ">=10.8.2"
+  },
   "devDependencies": {
     "webpack": "^5.101.3",
     "webpack-cli": "^6.0.1",
