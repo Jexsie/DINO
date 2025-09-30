@@ -1,9 +1,9 @@
 {
   "name": "dino",
   "scripts": {
-    "start": "webpack-dev-server",
+    "dev": "webpack-dev-server",
     "build": "webpack --mode=production",
-    "serve": "serve -s dist -l 8080"
+    "start": "serve -s dist -l 8080"
   },
   "engines": {
     "node": ">=20.19.4",
