@@ -47,9 +47,28 @@ const TOKEN_ID = TokenId.fromString(process.env.TOKEN_ID);
 const client = Client.forName("testnet").setOperator(OPERATOR_ID, OPERATOR_KEY);
 
 const CID = [
-  "bafkreifuscueitkigrok6k6x4wmil2n52nki4sis3u7h3k6hexekrp7yte",
-  "bafkreicuj6i5iggvkrsduy4ii52e4xzk7hulntfxywaos66xuwfzesi7hy",
-  "bafkreidtyyug6yhvwbbnk3efiguavl5colwlvuatlrihogkcrdcl6p2f6u",
+  "bafybeibyfslaitpxikvyvlo7ruza6iq3auuz3hj3ciqqeemzb4qcrkvaue/metadata.json",
+  "bafybeid5vhhz35zmsmpytsojrzsbsxjmfiuymjiooomulao4q6vb76nbwa/metadata.json",
+  "bafybeieg3dpzjsseu5c62zvt7xi54kxc63tbgnw6zdj5qy2242j2ecde2u/metadata.json",
+  "bafybeih6e3cq3qbuxbdrrhenolj3fxaqlazg6kq4lu67j7gi72deay6vy4/metadata.json",
+  "bafybeib674v6puikaaomzywgssa6vlkjbhpmpvzy3d4my4njyfxviovcfy/metadata.json",
+  "bafybeie5tojzeo2zqmitigytmnhyztmrllrhnvsq74zc2n3ielu3hcnqza/metadata.json",
+  "bafybeicyhntm53c3zxajqir22iwo7nhewmkos3gzc5psr2xyhu335a63e4/metadata.json",
+  "bafybeiahak2ohv4xplcw6i62be2fwe6eddh3475bhfjkbdutiyrp3dtcfq/metadata.json",
+  "bafybeifze2wdhosgrffsl3dm3ardwqchhxskdghmvwzol62i2tvwhollyu/metadata.json",
+  "bafybeihcyf6uiuyzypvmaojcwp3ng7uto22bjrj44z4pjayjwaitdn7zhy/metadata.json",
+  "bafybeicoixl3blwncfj2ozw5t2bvospzfmymnkcbb7ht4pekkki3vq6hte/metadata.json",
+  "bafybeifujjtobq7oxvp5qfgbjaswh5fctsom4pfmjuzxvgpykdozhgtcge/metadata.json",
+  "bafybeianu73os327p2mpqxgj4rhhxyro66rt2aijnbawfqfx5qa27o43fy/metadata.json",
+  "bafybeif3iiboogrwelxvfnemya4tu6ij3y7fd3cdnw6dcvwaxnwycrbnbu/metadata.json",
+  "bafybeihttolmu7iea2ifjjeyhx4l5iz7vrrjhnl7rewo7jn2jmshet6fr4/metadata.json",
+  "bafybeibwbpca4urb5lvc2ncbgf6mv3sldzntgorkw35jbivf7ramfnfeoy/metadata.json",
+  "bafybeieyngbfkc7qu4qkfuxf27su4ct447bmbpamjyawql7k56eci55d5i/metadata.json",
+  "bafybeieuyefg6fbnl5lrn3mlbqsix2w72xyrn3fdswx7k65iuq5xhe6xc4/metadata.json",
+  "bafybeiavcio57ubhssj4jjy4htnmxwcvmhsvp6nbt5tp6hcsfauag6e3iq/metadata.json",
+  "bafybeihz2j2q7wtomhkmqbe7zqfq6ubeshzjjwwjrkjww3vv7xsed7xlw4/metadata.json",
+  "bafybeigvbxfeoesqo3likz2tvyrdjnrmazlpn5namfqcv52cvar35pd6nq/metadata.json",
+  "bafybeibo23rpexqe7x2mpdufgt6imopo75ybb2f2bb7hrslc3ucpwkdxom/metadata.json",
 ];
 
 const random = `ipfs://${CID[Math.floor(Math.random() * CID.length)]}`;
