@@ -1,6 +1,7 @@
 # 🦖 Dino – A Blockchain-Powered Endless Runner
 
 Dino is a retro-style endless runner game inspired by the Chrome offline dinosaur game – but with a twist: **your high scores earn NFTs on Hedera** 🎉.
+[DEMO](https://dino.open-elements.cloud/)
 
 Built for the **Hedera Africa Hackathon 2025**, Dino combines fun gameplay, blockchain tokenization, and NFT-based theming into one experience.
 
