@@ -132,7 +132,7 @@ export async function requestAssociation() {
   return res;
 }
 
-export async function mintForHighScore() {
+export async function mintForHighScore(highScore) {
   try {
     const response = await fetch(
       `http://localhost:3000/api/mint-nft/${AccountId.fromString(
@@ -146,7 +146,7 @@ export async function mintForHighScore() {
     }
 
     const { serial } = await response.json();
-    console.log("Minted NFT with serial:", serial);
+    await submitScore(window.currentWallet.accountId, highScore);
   } catch (error) {
     console.error("Error during mint and transfer:", error);
   }
@@ -184,6 +184,27 @@ export async function getNftsForUser(accountId) {
   } catch {}
 }
 
+async function submitScore(accountId, score) {
+  try {
+    const response = await fetch("http://localhost:3000/score", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        accountId: accountId,
+        score: score,
+        name: accountId,
+      }),
+    });
+
+    return await response.json();
+  } catch (error) {
+    console.error("Error submitting score:", error);
+    return { success: false, error: "Network error" };
+  }
+}
+
 async function fetchMetadata(url) {
   const response = await fetch(url);
   return await response.json();
@@ -197,12 +218,9 @@ function decodeMetadata(base64Metadata) {
 export function normalizeIpfsUri(uri) {
   if (!uri) return null;
 
-  // Remove the "ipfs://" prefix
   if (uri.startsWith("ipfs://")) {
     const cid = uri.replace("ipfs://", "");
     return `${PINATA_GATEWAY}/ipfs/${cid}`;
   }
-
-  // Already an HTTP(S) link
   return uri;
 }

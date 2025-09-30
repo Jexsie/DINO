@@ -19,15 +19,6 @@ module.exports = {
     },
     port: 8080,
     open: true,
-    // proxy: [
-    //   // The proxy option now expects an array
-    //   {
-    //     context: ["/api"], // The path to match
-    //     target: "http://localhost:3001", // Your Express server
-    //     // This ensures the Host header is changed for the target server
-    //     changeOrigin: true,
-    //   },
-    // ],
   },
   plugins: [
     new HtmlWebpackPlugin({

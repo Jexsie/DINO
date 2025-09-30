@@ -1,3 +1,4 @@
+import "./modalEvents";
 import {
   AllocatorCharacterArray,
   Character,
@@ -388,10 +389,39 @@ function initialize() {
   //   document.body.dispatchEvent(new KeyboardEvent("keydown", { key: " " }));
   // });
 
+  // canvas.addEventListener(
+  //   "touchstart",
+  //   (e) => {
+  //     e.preventDefault();
+  //     document.body.dispatchEvent(new KeyboardEvent("keydown", { key: " " }));
+  //   },
+  //   { passive: false }
+  // );
+
+  // document.body.onkeydown = (event) => {
+  //   if (event.key === " " || event.keyCode === 32) {
+  //     event.preventDefault();
+  //     handleStartOrJump();
+  //   }
+  // };
+
+  function showWalletModal() {
+    const walletModal = document.getElementById("walletModal");
+    if (walletModal) walletModal.classList.remove("hidden");
+  }
+
+  document.getElementById("walletModalClose")?.addEventListener("click", () => {
+    document.getElementById("walletModal").classList.add("hidden");
+  });
+
   canvas.addEventListener(
     "touchstart",
     (e) => {
       e.preventDefault();
+      if (!window.currentWallet?.accountId) {
+        showWalletModal();
+        return;
+      }
       document.body.dispatchEvent(new KeyboardEvent("keydown", { key: " " }));
     },
     { passive: false }
@@ -400,6 +430,10 @@ function initialize() {
   document.body.onkeydown = (event) => {
     if (event.key === " " || event.keyCode === 32) {
       event.preventDefault();
+      if (!window.currentWallet?.accountId) {
+        showWalletModal();
+        return;
+      }
       handleStartOrJump();
     }
   };
@@ -580,7 +614,25 @@ async function event_loop() {
           "project.github.chrome_dino.high_score",
           String(game_score)
         );
-        game_hi_score = game_score;
+        const modal = document.getElementById("highScoreModal");
+        if (modal) {
+          modal.classList.remove("hidden");
+          const closeModalButton = document.getElementById(
+            "closeHighScoreModal"
+          );
+
+          // Resize modal canvas
+          const modalFx = document.getElementById("modalFx");
+          if (modalFx) {
+            modalFx.width = modal.offsetWidth;
+            modalFx.height = modal.offsetHeight;
+            modalConfettiBurst({}); // 🎉 trigger confetti
+          }
+
+          closeModalButton.onclick = () => {
+            modal.classList.add("hidden");
+          };
+        }
 
         canvas_ctx.textBaseline = "middle";
         canvas_ctx.textAlign = "center";
@@ -604,7 +656,7 @@ async function event_loop() {
           }
         }, 2500);
 
-        mintForHighScore()
+        mintForHighScore(game_hi_score)
           .then(() => console.log("NFT minted successfully!"))
           .catch(console.error);
       }
@@ -636,6 +688,61 @@ async function event_loop() {
   if (!game_over) {
     animationFrameId = requestAnimationFrame(event_loop);
   }
+}
+
+const modalFx = document.getElementById("modalFx");
+const modalFxCtx = modalFx ? modalFx.getContext("2d") : null;
+
+function modalConfettiBurst({
+  x = modalFx.width / 2,
+  y = modalFx.height / 2,
+  count = 80,
+  speed = 5,
+  spread = Math.PI,
+}) {
+  if (!modalFxCtx) return;
+  let particles = [];
+  for (let i = 0; i < count; i++) {
+    const angle = (Math.random() - 0.5) * spread + -Math.PI / 2;
+    const v = speed * (0.5 + Math.random());
+    particles.push({
+      x,
+      y,
+      vx: Math.cos(angle) * v,
+      vy: Math.sin(angle) * v,
+      g: 0.18 + Math.random() * 0.1,
+      size: 3 + Math.random() * 3,
+      rot: Math.random() * Math.PI,
+      vr: (Math.random() - 0.5) * 0.2,
+      color:
+        CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)],
+      life: 90 + Math.random() * 40,
+    });
+  }
+
+  function loop() {
+    modalFxCtx.clearRect(0, 0, modalFx.width, modalFx.height);
+    particles.forEach((p, i) => {
+      p.vy += p.g;
+      p.x += p.vx;
+      p.y += p.vy;
+      p.rot += p.vr;
+      p.life--;
+
+      modalFxCtx.save();
+      modalFxCtx.translate(p.x, p.y);
+      modalFxCtx.rotate(p.rot);
+      modalFxCtx.fillStyle = p.color;
+      modalFxCtx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+      modalFxCtx.restore();
+    });
+    particles = particles.filter(
+      (p) => p.life > 0 && p.y < modalFx.height + 20
+    );
+    if (particles.length > 0) requestAnimationFrame(loop);
+  }
+
+  loop();
 }
 
 // === BOOT ===
@@ -823,8 +930,6 @@ function updateWalletUI(accountId) {
   }
 }
 
-console.log("index.js loaded");
-
 (async function initUI() {
   console.log("initUI running…");
 
@@ -851,6 +956,13 @@ console.log("index.js loaded");
       await disconnectWallet();
       updateWalletUI(null);
     });
+  }
+
+  if (window.reinitModals) {
+    setTimeout(() => {
+      console.log("Re-initializing modals after wallet setup");
+      window.reinitModals();
+    }, 500);
   }
 })();
 

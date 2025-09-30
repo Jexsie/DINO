@@ -222,17 +222,42 @@
           </h2>
           <p class="text-xl leading-relaxed text-center text-white text-shadow">
             Embark on an epic journey through the pixelated world of Dino, a
-            blockchain-powered adventure where you can collect, battle, and
-            trade unique digital creatures. Explore diverse landscapes, uncover
-            hidden treasures, and challenge other players in thrilling arena
-            battles. With its retro charm and innovative gameplay, Dino offers a
-            nostalgic yet cutting-edge gaming experience.
+            blockchain-powered adventure where you can collect new theme tokens
+            each time you beat your high score. Use the SPACE button to dodge
+            obstacles. Select theme tokens that will appear on the left and
+            right, if you are good enough 🦖, to change the theme.
+            <br />
+            CIAO!!!
           </p>
         </div>
       </main>
+
       <footer
         class="fixed bottom-0 left-0 right-0 p-4 bg-[#131118]/80 backdrop-blur-sm z-50"
       >
+        <div class="relative">
+          <!-- Store Modal -->
+          <div
+            id="storeModal"
+            class="hidden absolute bottom-8 left-1/2 w-80 max-h-[60vh] bg-gray-800 text-white pixel-border shadow-xl overflow-y-auto z-[2000]"
+          >
+            <div class="p-4">
+              <h2 class="pixel-font text-lg mb-4">Your Themes</h2>
+              <ul id="storeList" class="space-y-2"></ul>
+            </div>
+          </div>
+
+          <!-- Leaderboard Modal -->
+          <div
+            id="leaderboardModal"
+            class="hidden absolute bottom-8 left-1/4 w-80 max-h-[60vh] bg-gray-800 text-white pixel-border shadow-xl overflow-y-auto z-[2000]"
+          >
+            <div class="p-4">
+              <h2 class="pixel-font text-lg mb-4">Leaderboard</h2>
+              <ul id="leaderboardList" class="space-y-2"></ul>
+            </div>
+          </div>
+        </div>
         <nav class="flex justify-center gap-4">
           <a
             class="pixel-button pixel-font text-lg text-white bg-blue-600 py-2 px-4 flex items-center gap-2"
@@ -241,20 +266,20 @@
             <span class="material-symbols-outlined">home</span>
             Home
           </a>
-          <a
+          <button
             class="pixel-button pixel-font text-lg text-white bg-yellow-500 py-2 px-4 flex items-center gap-2"
-            href="#"
+            id="leaderboardBtn"
           >
             <span class="material-symbols-outlined">leaderboard</span>
             Leaderboard
-          </a>
-          <a
+          </button>
+          <button
+            id="storeBtn"
             class="pixel-button pixel-font text-lg text-white bg-red-600 py-2 px-4 flex items-center gap-2"
-            href="#"
           >
             <span class="material-symbols-outlined">storefront</span>
             Store
-          </a>
+          </button>
 
           <!-- Wallet status (hidden until connected) -->
           <div
@@ -276,6 +301,55 @@
         </nav>
       </footer>
     </div>
+    <!-- High Score Modal -->
+    <div
+      id="highScoreModal"
+      class="hidden fixed inset-0 bg-black/80 flex items-center justify-center z-[999]"
+    >
+      <!-- Confetti overlay inside modal -->
+      <canvas
+        id="modalFx"
+        class="absolute inset-0 pointer-events-none"
+      ></canvas>
+
+      <div
+        class="relative bg-yellow-300 pixel-border p-8 max-w-md w-full text-center z-10"
+      >
+        <h2 class="pixel-font text-2xl mb-4 text-shadow text-purple-700">
+          Whoopy!!! 🎉
+        </h2>
+        <p class="pixel-font text-lg mb-6 text-black">
+          New High Score!<br />
+          Getting theme token for you...
+        </p>
+        <button
+          id="closeHighScoreModal"
+          class="pixel-button pixel-font bg-green-600 text-white px-6 py-3"
+        >
+          Okay
+        </button>
+      </div>
+    </div>
+
+    <!-- Connect Wallet First Modal -->
+    <div
+      id="walletModal"
+      class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-[9999]"
+    >
+      <div class="bg-gray-800 text-white pixel-border p-6 w-96 text-center">
+        <h2 class="pixel-font text-2xl mb-4">Connect Wallet</h2>
+        <p class="mb-4">
+          You need to connect your wallet first before playing.
+        </p>
+        <button
+          id="walletModalClose"
+          class="pixel-button bg-green-500 px-4 py-2 text-white pixel-font"
+        >
+          Got it
+        </button>
+      </div>
+    </div>
+
     <script src="./output.js" defer></script>
   </body>
 </html>
